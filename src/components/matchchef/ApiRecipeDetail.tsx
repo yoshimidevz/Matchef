@@ -3,7 +3,6 @@ import {
   View, Text, Pressable, ScrollView, Image,
   StyleSheet, Modal, Linking, ActivityIndicator,
 } from "react-native";
-import Animated, { FadeIn, FadeInDown, SlideInDown, useAnimatedStyle, withRepeat, withTiming, useSharedValue } from "react-native-reanimated";
 import { X, Globe, Tag, Youtube, RefreshCw, Recycle } from "lucide-react-native";
 import { getMealById, type MealDetail } from "../../services/mealApi";
 import { useLanguage, type Language } from "../../i18n/LanguageContext";
@@ -74,7 +73,7 @@ function SubTooltip({ ingredient, sub, lang }: { ingredient: string; sub: string
         <RefreshCw size={14} color="#22c55e" />
       </Pressable>
       {open && (
-        <Animated.View entering={FadeInDown.duration(200)} style={styles.subTooltip}>
+        <View style={styles.subTooltip}>
           <Text style={styles.subTooltipTitle}>{t("substitution.title")}</Text>
           <Text style={styles.subTooltipText}>
             {t("substitution.missing_prefix")}{" "}
@@ -83,7 +82,7 @@ function SubTooltip({ ingredient, sub, lang }: { ingredient: string; sub: string
           <Text style={styles.subTooltipSub}>
             {t("substitution.swap")} <Text style={{ fontWeight: "700", color: "#fff" }}>{sub}</Text>
           </Text>
-        </Animated.View>
+        </View>
       )}
     </View>
   );
@@ -101,12 +100,6 @@ export function ApiRecipeDetail({ mealId, meal: preloaded, onClose, zeroWaste }:
   const [loading, setLoading] = useState(!preloaded);
   const { t, tIngredient, language } = useLanguage();
   const insets = useSafeAreaInsets();
-
-  const scale = useSharedValue(1);
-  useEffect(() => {
-    scale.value = withRepeat(withTiming(1.12, { duration: 2000 }), -1, true);
-  }, []);
-  const pulseStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
 
   useEffect(() => {
     if (preloaded) { setMeal(preloaded); setLoading(false); return; }
@@ -172,10 +165,10 @@ export function ApiRecipeDetail({ mealId, meal: preloaded, onClose, zeroWaste }:
                 const zw = getZeroWasteDetail(meal, language);
                 if (!zw) return null;
                 return (
-                  <Animated.View entering={FadeInDown.duration(400)} style={styles.zeroWasteCard}>
-                    <Animated.View style={[styles.zeroWasteIcon, pulseStyle]}>
+                  <View style={styles.zeroWasteCard}>
+                    <View style={[styles.zeroWasteIcon]}>
                       <Recycle size={20} color="#22c55e" />
-                    </Animated.View>
+                    </View>
                     <View style={{ flex: 1 }}>
                       <Text style={styles.zeroWasteTitle}>{t("zerowaste.magic_title")}</Text>
                       <Text style={styles.zeroWasteDesc}>
@@ -188,7 +181,7 @@ export function ApiRecipeDetail({ mealId, meal: preloaded, onClose, zeroWaste }:
                         <Text style={{ fontWeight: "700", color: "#22c55e" }}>{zw.transform}</Text>.
                       </Text>
                     </View>
-                  </Animated.View>
+                  </View>
                 );
               })()}
 

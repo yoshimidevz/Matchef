@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { View, Text, Pressable, ScrollView, Image, StyleSheet, ActivityIndicator } from "react-native";
-import Animated, { FadeInDown, FadeInRight } from "react-native-reanimated";
 import { getRandomMeals, type MealDetail } from "../../services/mealApi";
 import { useLanguage, type Language } from "../../i18n/LanguageContext";
 
@@ -46,7 +45,7 @@ export function DailyRecipes({ onSelect, zeroWaste }: DailyRecipesProps) {
   }, []);
 
   return (
-    <Animated.View entering={FadeInDown.delay(300).duration(400)}>
+    <View>
       <Text style={styles.sectionTitle}>{t("daily.title")}</Text>
 
       <ScrollView
@@ -65,9 +64,8 @@ export function DailyRecipes({ onSelect, zeroWaste }: DailyRecipesProps) {
               </View>
             ))
           : meals.map((meal, i) => (
-              <Animated.View
+              <View
                 key={meal.idMeal}
-                entering={FadeInRight.delay(i * 60).duration(300)}
               >
                 <Pressable onPress={() => onSelect(meal)} style={styles.card}>
                   <View style={styles.imageContainer}>
@@ -93,10 +91,10 @@ export function DailyRecipes({ onSelect, zeroWaste }: DailyRecipesProps) {
                     {meal.strMeal}
                   </Text>
                 </Pressable>
-              </Animated.View>
+              </View>
             ))}
       </ScrollView>
-    </Animated.View>
+    </View>
   );
 }
 

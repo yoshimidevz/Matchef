@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
-import Animated, { FadeInDown, ZoomIn } from "react-native-reanimated";
 import { Check } from "lucide-react-native";
 import { useLanguage, type TranslationKey } from "../../i18n/LanguageContext";
 
@@ -75,7 +74,7 @@ export function PopularIngredients({ selected, onToggle }: PopularIngredientsPro
   const activeCategory = categories.find((c) => c.id === activeTab)!;
 
   return (
-    <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+    <View>
       <Text style={styles.sectionTitle}>{t("popular.title")}</Text>
 
       {/* Tabs */}
@@ -107,9 +106,8 @@ export function PopularIngredients({ selected, onToggle }: PopularIngredientsPro
         {activeCategory.items.map((item, i) => {
           const isSelected = selected.has(item.name);
           return (
-            <Animated.View
+            <View
               key={item.name}
-              entering={ZoomIn.delay(i * 30).duration(200)}
               style={styles.gridCell}
             >
               <Pressable
@@ -128,11 +126,11 @@ export function PopularIngredients({ selected, onToggle }: PopularIngredientsPro
                   {tIngredient(item.name)}
                 </Text>
               </Pressable>
-            </Animated.View>
+            </View>
           );
         })}
       </View>
-    </Animated.View>
+    </View>
   );
 }
 

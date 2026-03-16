@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import { Search, Plus } from "lucide-react-native";
 import { useLanguage } from "../../i18n/LanguageContext";
 
@@ -20,11 +19,11 @@ export function HeroSearch({ onAddIngredient }: HeroSearchProps) {
   };
 
   return (
-    <Animated.View entering={FadeInDown.duration(400)} style={styles.container}>
-      <Animated.Text entering={FadeInDown.delay(100).duration(400)} style={styles.title}>
+    <View style={styles.container}>
+      <Text style={styles.title}>
         {t("hero.title_prefix")}{" "}
         <Text style={styles.titleHighlight}>{t("hero.title_highlight")}</Text>?
-      </Animated.Text>
+      </Text>
 
       <Text style={styles.subtitle}>{t("hero.subtitle")}</Text>
 
@@ -48,7 +47,7 @@ export function HeroSearch({ onAddIngredient }: HeroSearchProps) {
           <Text style={styles.addBtnText}>{t("hero.add")}</Text>
         </Pressable>
       </View>
-    </Animated.View>
+    </View>
   );
 }
 

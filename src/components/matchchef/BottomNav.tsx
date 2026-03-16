@@ -1,5 +1,4 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
-import Animated, { useAnimatedStyle, withSpring, FadeInUp } from "react-native-reanimated";
 import { Search, Users, UserCircle } from "lucide-react-native";
 import { useRouter, usePathname } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -28,7 +27,7 @@ export function BottomNav() {
             style={styles.tab}
           >
             {active && (
-              <Animated.View entering={FadeInUp.duration(200)} style={styles.indicator} />
+              <View style={styles.indicator} />
             )}
             <tab.Icon size={22} color={active ? "hsl(25,90%,55%)" : "#666"} />
             <Text style={[styles.label, active && styles.labelActive]}>

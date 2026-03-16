@@ -1,6 +1,5 @@
 import { useRef } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
 import { ChefHat, Search, UtensilsCrossed, Globe } from "lucide-react-native";
 import { useRouter, usePathname } from "expo-router";
 import { useLanguage } from "../../i18n/LanguageContext";
@@ -16,8 +15,7 @@ export function Header() {
   const toggleLang = () => setLanguage(language === "pt" ? "en" : "pt");
 
   return (
-    <Animated.View
-      entering={hasAnimated.current ? undefined : FadeInDown.duration(400)}
+    <View
       style={[styles.container, { paddingTop: insets.top }]}
     >
       <View style={styles.inner}>
@@ -54,7 +52,7 @@ export function Header() {
           </Pressable>
         </View>
       </View>
-    </Animated.View>
+    </View>
   );
 }
 
