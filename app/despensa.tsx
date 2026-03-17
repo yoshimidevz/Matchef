@@ -10,6 +10,8 @@ import { RecipeList } from "../src/components/matchchef/RecipeList";
 import { KitchenMode } from "../src/components/matchchef/KitchenMode";
 import { ShoppingList } from "../src/components/matchchef/ShoppingList";
 import { useMatchChef, type MatchedRecipe } from "../src/hooks/useMatchChef";
+import { Bot } from "lucide-react-native";
+import { BottomNav } from "../src/components/matchchef/BottomNav";
 
 export default function Despensa() {
   const insets = useSafeAreaInsets();
@@ -60,6 +62,7 @@ export default function Despensa() {
           hasSelection={selectedIngredients.size > 0}
         />
       </ScrollView>
+      <BottomNav/>
 
       <ShoppingList items={shoppingList} onRemove={removeFromShoppingList} />
 
