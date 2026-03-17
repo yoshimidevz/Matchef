@@ -47,7 +47,29 @@ export type TranslationKey =
   | "cooking.of"
   | "kitchen.back"
   | "kitchen.next"
-  | "kitchen.finish";
+  | "kitchen.finish"
+  | "community.title"
+  | "community.success"
+  | "community.fail"
+  | "community.recipe_used"
+  | "community.photo_alt"
+  | "comments.title"
+  | "comments.empty"
+  | "comments.placeholder"
+  | "create.title"
+  | "create.photo_placeholder"
+  | "create.link_recipe"
+  | "create.how_was_it"
+  | "create.description"
+  | "create.description_placeholder"
+  | "create.publish"
+  | "create.published_title"
+  | "create.published_desc"
+  | "auth.title"
+  | "auth.subtitle"
+  | "auth.email"
+  | "auth.password"
+  | "auth.login";
 
 export const translations: Record<TranslationKey, Record<Language, string>> = {
   "header.subtitle":              { pt: "Cozinhe com o que você tem", en: "Cook with what you have" },
@@ -93,6 +115,28 @@ export const translations: Record<TranslationKey, Record<Language, string>> = {
   "kitchen.back":     { pt: "Voltar", en: "Back" },
   "kitchen.next":     { pt: "Próximo", en: "Next" },
   "kitchen.finish":   { pt: "Finalizar", en: "Finish" },
+  "community.title":        { pt: "Compartilhe suas receitas", en: "Share your recipes" },
+  "community.success":      { pt: "Receita publicada com sucesso!", en: "Recipe published successfully!" },
+  "community.fail":         { pt: "Falha ao publicar receita. Tente novamente.", en: "Failed to publish recipe. Please try again." },
+  "community.recipe_used":  { pt: "Essa receita já foi usada recentemente. Tente outra!", en: "This recipe has already been used recently. Try another one!" },
+  "community.photo_alt":    { pt: "Foto da receita", en: "Recipe photo" },
+  "comments.title":        { pt: "Comentários", en: "Comments" },
+  "comments.empty":        { pt: "Seja o primeiro a comentar!", en: "Be the first to comment!" },
+  "comments.placeholder":  { pt: "Escreva seu comentário...", en: "Write your comment..." },
+  "create.title":         { pt: "Criar nova receita", en: "Create new recipe" },
+  "create.photo_placeholder": { pt: "Tire uma foto ou escolha da galeria", en: "Take a photo or choose from gallery" },
+  "create.link_recipe":    { pt: "Link da receita (opcional)", en: "Recipe link (optional)" },
+  "create.how_was_it":     { pt: "Como foi sua experiência?", en: "How was your experience?" },
+  "create.description":    { pt: "Descrição", en: "Description" },
+  "create.description_placeholder": { pt: "Escreva uma descrição para sua receita...", en: "Write a description for your recipe..." },
+  "create.publish":       { pt: "Publicar", en: "Publish" },
+  "create.published_title": { pt: "Receita publicada!", en: "Recipe published!" },
+  "create.published_desc": { pt: "Obrigado por compartilhar sua receita com a comunidade MatchChef!", en: "Thank you for sharing your recipe with the MatchChef community!" },
+  "auth.title":          { pt: "Bem-vindo ao MatchChef", en: "Welcome to MatchChef" },
+  "auth.subtitle":       { pt: "Faça login para começar a cozinhar com o que você tem!", en: "Log in to start cooking with what you have!" },
+  "auth.email":          { pt: "Email", en: "Email" },
+  "auth.password":       { pt: "Senha", en: "Password" },
+  "auth.login":          { pt: "Entrar", en: "Log In" },
 };
 
 // ── Ingredient map (PT) ───────────────────────────────────────────────────────
