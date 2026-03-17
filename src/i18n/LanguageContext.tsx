@@ -95,7 +95,21 @@ export type TranslationKey =
   | "settings.new_followers"
   | "settings.logout"
   | "settings.logout_title"
-  | "settings.logout_desc";
+  | "settings.logout_desc"
+  | "results.title"
+  | "results.ingredient"
+  | "results.ingredients"
+  | "results.selected"
+  | "results.selected_plural"
+  | "results.urgent_count"
+  | "results.urgent_count_plural"
+  | "results.analyzing"
+  | "results.you_have"
+  | "results.of"
+  | "results.missing"
+  | "results.save_your"
+  | "results.no_results"
+  | "results.go_back";
 
 export const translations: Record<TranslationKey, Record<Language, string>> = {
   "header.subtitle":              { pt: "Cozinhe com o que você tem", en: "Cook with what you have" },
@@ -189,6 +203,20 @@ export const translations: Record<TranslationKey, Record<Language, string>> = {
   "settings.logout":         { pt: "Sair da conta", en: "Log out" },
   "settings.logout_title":   { pt: "Confirmação de logout", en: "Logout confirmation" },
   "settings.logout_desc":    { pt: "Tem certeza de que deseja sair da sua conta?", en: "Are you sure you want to log out of your account?" },
+  "results.title":          { pt: "Resultados da busca", en: "Search results" },
+  "results.ingredient":     { pt: "ingrediente", en: "ingredient" },
+  "results.ingredients":    { pt: "ingredientes", en: "ingredients" },
+  "results.selected":       { pt: "Selecionado", en: "Selected" },
+  "results.selected_plural": { pt: "Selecionados", en: "Selected" },
+  "results.urgent_count":   { pt: "{count} urgente", en: "{count} urgent" },
+  "results.urgent_count_plural": { pt: "{count} urgentes", en: "{count} urgent" },
+  "results.analyzing":      { pt: "Analisando ingredientes...", en: "Analyzing ingredients..." },
+  "results.you_have":       { pt: "Você tem", en: "You have" },
+  "results.of":            { pt: "de", en: "of" },
+  "results.missing":       { pt: "faltando", en: "missing" },
+  "results.save_your":     { pt: "Salve suas receitas favoritas para acessá-las facilmente depois!", en: "Save your favorite recipes to access them easily later!" },
+  "results.no_results":    { pt: "Nenhuma receita encontrada. Tente adicionar mais ingredientes ou verificar a ortografia.", en: "No recipes found. Try adding more ingredients or checking the spelling." },
+  "results.go_back":       { pt: "Voltar para a busca", en: "Go back to search" },
 };
 
 // ── Ingredient map (PT) ───────────────────────────────────────────────────────
