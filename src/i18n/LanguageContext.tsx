@@ -21,6 +21,7 @@ export type TranslationKey =
   | "nav.search"
   | "nav.community"
   | "nav.profile"
+  | "nav.pantry"
   | "zerowaste.label"
   | "zerowaste.magic_title"
   | "zerowaste.description_prefix"
@@ -39,7 +40,14 @@ export type TranslationKey =
   | "detail.start_cooking"
   | "substitution.title"
   | "substitution.missing_prefix"
-  | "substitution.swap";
+  | "substitution.swap"
+  | "chef.level"
+  | "despensa.recipes"
+  | "cooking.step"
+  | "cooking.of"
+  | "kitchen.back"
+  | "kitchen.next"
+  | "kitchen.finish";
 
 export const translations: Record<TranslationKey, Record<Language, string>> = {
   "header.subtitle":              { pt: "Cozinhe com o que você tem", en: "Cook with what you have" },
@@ -58,6 +66,7 @@ export const translations: Record<TranslationKey, Record<Language, string>> = {
   "nav.search":                   { pt: "Buscar", en: "Search" },
   "nav.community":                { pt: "Comunidade", en: "Community" },
   "nav.profile":                  { pt: "Perfil", en: "Profile" },
+  "nav.pantry": { pt: "Despensa", en: "Pantry" },
   "zerowaste.label":              { pt: "Zero Desperdício", en: "Zero Waste" },
   "zerowaste.magic_title":        { pt: "✨ Magia Zero Waste", en: "✨ Zero Waste Magic" },
   "zerowaste.description_prefix": { pt: "Use os", en: "Use the" },
@@ -77,6 +86,13 @@ export const translations: Record<TranslationKey, Record<Language, string>> = {
   "substitution.title":           { pt: "Substituição sugerida", en: "Suggested substitution" },
   "substitution.missing_prefix":  { pt: "Sem", en: "No" },
   "substitution.swap":            { pt: "Tente:", en: "Try:" },
+  "chef.level":                   { pt: "Nível", en: "Level" },
+  "despensa.recipes": { pt: "receitas", en: "recipes" },
+  "cooking.step":     { pt: "Passo", en: "Step" },
+  "cooking.of":       { pt: "de", en: "of" },
+  "kitchen.back":     { pt: "Voltar", en: "Back" },
+  "kitchen.next":     { pt: "Próximo", en: "Next" },
+  "kitchen.finish":   { pt: "Finalizar", en: "Finish" },
 };
 
 // ── Ingredient map (PT) ───────────────────────────────────────────────────────
