@@ -69,7 +69,33 @@ export type TranslationKey =
   | "auth.subtitle"
   | "auth.email"
   | "auth.password"
-  | "auth.login";
+  | "auth.login"
+  | "profile.posts"
+  | "profile.followers"
+  | "profile.following"
+  | "profile.edit"
+  | "profile.my_posts"
+  | "profile.saved"
+  | "profile.saved_label"
+  | "profile.no_posts"
+  | "profile.no_saved"
+  | "profile.cover_alt"
+  | "settings.title"
+  | "settings.account"
+  | "settings.personal_data"
+  | "settings.change_password"
+  | "settings.preferences"
+  | "settings.language"
+  | "settings.dark_mode"
+  | "settings.dietary"
+  | "settings.vegetarian"
+  | "settings.lactose_free"
+  | "settings.notifications"
+  | "settings.likes_notif"
+  | "settings.new_followers"
+  | "settings.logout"
+  | "settings.logout_title"
+  | "settings.logout_desc";
 
 export const translations: Record<TranslationKey, Record<Language, string>> = {
   "header.subtitle":              { pt: "Cozinhe com o que você tem", en: "Cook with what you have" },
@@ -137,6 +163,32 @@ export const translations: Record<TranslationKey, Record<Language, string>> = {
   "auth.email":          { pt: "Email", en: "Email" },
   "auth.password":       { pt: "Senha", en: "Password" },
   "auth.login":          { pt: "Entrar", en: "Log In" },
+  "profile.posts":       { pt: "Publicações", en: "Posts" },
+  "profile.followers":   { pt: "Seguidores", en: "Followers" },
+  "profile.following":   { pt: "Seguindo", en: "Following" },
+  "profile.edit":        { pt: "Editar perfil", en: "Edit profile" },
+  "profile.my_posts":    { pt: "Minhas publicações", en: "My posts" },
+  "profile.saved":       { pt: "Receitas salvas", en: "Saved recipes" },
+  "profile.saved_label": { pt: "Salvas", en: "Saved" },
+  "profile.no_posts":    { pt: "Nenhuma publicação ainda.", en: "No posts yet." },
+  "profile.no_saved":    { pt: "Nenhuma receita salva ainda.", en: "No saved recipes yet." },
+  "profile.cover_alt":   { pt: "Foto de capa do perfil", en: "Profile cover photo" },
+  "settings.title":          { pt: "Configurações", en: "Settings" },
+  "settings.account":        { pt: "Conta", en: "Account" },
+  "settings.personal_data":  { pt: "Dados pessoais", en: "Personal data" },
+  "settings.change_password": { pt: "Alterar senha", en: "Change password" },
+  "settings.preferences":    { pt: "Preferências", en: "Preferences" },
+  "settings.language":       { pt: "Idioma", en: "Language" },
+  "settings.dark_mode":      { pt: "Modo escuro", en: "Dark mode" },
+  "settings.dietary":        { pt: "Restrições alimentares", en: "Dietary restrictions" },
+  "settings.vegetarian":     { pt: "Vegetariano", en: "Vegetarian" },
+  "settings.lactose_free":   { pt: "Sem lactose", en: "Lactose-free" },
+  "settings.notifications":   { pt: "Notificações", en: "Notifications" },
+  "settings.likes_notif":     { pt: "Curtidas", en: "Likes" },
+  "settings.new_followers":  { pt: "Novos seguidores", en: "New followers" },
+  "settings.logout":         { pt: "Sair da conta", en: "Log out" },
+  "settings.logout_title":   { pt: "Confirmação de logout", en: "Logout confirmation" },
+  "settings.logout_desc":    { pt: "Tem certeza de que deseja sair da sua conta?", en: "Are you sure you want to log out of your account?" },
 };
 
 // ── Ingredient map (PT) ───────────────────────────────────────────────────────
