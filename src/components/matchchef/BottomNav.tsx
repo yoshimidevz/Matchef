@@ -1,5 +1,5 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
-import { Search, Users, UserCircle } from "lucide-react-native";
+import { Search, Users, UserCircle, UtensilsCrossed } from "lucide-react-native";
 import { useRouter, usePathname } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLanguage } from "../../i18n/LanguageContext";
@@ -11,9 +11,10 @@ export function BottomNav() {
   const { t } = useLanguage();
 
   const tabs = [
-    { path: "/", label: t("nav.search"), Icon: Search },
-    { path: "/comunidade", label: t("nav.community"), Icon: Users },
-    { path: "/perfil", label: t("nav.profile"), Icon: UserCircle },
+    { path: "/",          label: t("nav.search"),    Icon: Search },
+    { path: "/despensa",  label: t("nav.pantry"),     Icon: UtensilsCrossed },
+    { path: "/comunidade",label: t("nav.community"),  Icon: Users },
+    { path: "/perfil",    label: t("nav.profile"),    Icon: UserCircle },
   ];
 
   return (
