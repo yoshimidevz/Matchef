@@ -1,117 +1,14 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { toDisplayIngredient } from "./ingredientMap";
 
 // ── Translations ──────────────────────────────────────────────────────────────
 export type Language = "pt" | "en";
 
-export type TranslationKey =
-  | "header.subtitle"
-  | "hero.title_prefix"
-  | "hero.title_highlight"
-  | "hero.subtitle"
-  | "hero.placeholder"
-  | "hero.add"
-  | "popular.title"
-  | "cat.proteins"
-  | "cat.vegetables"
-  | "cat.pantry"
-  | "cat.dairy"
-  | "daily.title"
-  | "daily.reuse"
-  | "nav.search"
-  | "nav.community"
-  | "nav.profile"
-  | "nav.pantry"
-  | "zerowaste.label"
-  | "zerowaste.magic_title"
-  | "zerowaste.description_prefix"
-  | "zerowaste.description_mid"
-  | "urgent.tooltip"
-  | "cta.see_recipes"
-  | "cta.item"
-  | "cta.items"
-  | "cta.urgent"
-  | "cta.urgents"
-  | "detail.loading"
-  | "detail.ingredients_title"
-  | "detail.preparation"
-  | "detail.youtube"
-  | "detail.not_found"
-  | "detail.start_cooking"
-  | "substitution.title"
-  | "substitution.missing_prefix"
-  | "substitution.swap"
-  | "chef.level"
-  | "despensa.recipes"
-  | "cooking.step"
-  | "cooking.of"
-  | "kitchen.back"
-  | "kitchen.next"
-  | "kitchen.finish"
-  | "community.title"
-  | "community.success"
-  | "community.fail"
-  | "community.recipe_used"
-  | "community.photo_alt"
-  | "comments.title"
-  | "comments.empty"
-  | "comments.placeholder"
-  | "create.title"
-  | "create.photo_placeholder"
-  | "create.link_recipe"
-  | "create.how_was_it"
-  | "create.description"
-  | "create.description_placeholder"
-  | "create.publish"
-  | "create.published_title"
-  | "create.published_desc"
-  | "auth.title"
-  | "auth.subtitle"
-  | "auth.email"
-  | "auth.password"
-  | "auth.login"
-  | "profile.posts"
-  | "profile.followers"
-  | "profile.following"
-  | "profile.edit"
-  | "profile.my_posts"
-  | "profile.saved"
-  | "profile.saved_label"
-  | "profile.no_posts"
-  | "profile.no_saved"
-  | "profile.cover_alt"
-  | "settings.title"
-  | "settings.account"
-  | "settings.personal_data"
-  | "settings.change_password"
-  | "settings.preferences"
-  | "settings.language"
-  | "settings.dark_mode"
-  | "settings.dietary"
-  | "settings.vegetarian"
-  | "settings.lactose_free"
-  | "settings.notifications"
-  | "settings.likes_notif"
-  | "settings.new_followers"
-  | "settings.logout"
-  | "settings.logout_title"
-  | "settings.logout_desc"
-  | "results.title"
-  | "results.ingredient"
-  | "results.ingredients"
-  | "results.selected"
-  | "results.selected_plural"
-  | "results.urgent_count"
-  | "results.urgent_count_plural"
-  | "results.analyzing"
-  | "results.you_have"
-  | "results.of"
-  | "results.missing"
-  | "results.save_your"
-  | "results.no_results"
-  | "results.go_back";
+export type TranslationKey = keyof typeof translations;
+  
 
-export const translations: Record<TranslationKey, Record<Language, string>> = {
+export const translations = {
   "header.subtitle":              { pt: "Cozinhe com o que você tem", en: "Cook with what you have" },
   "hero.title_prefix":            { pt: "O que você tem", en: "What do you" },
   "hero.title_highlight":         { pt: "na geladeira", en: "have at home" },
@@ -217,22 +114,7 @@ export const translations: Record<TranslationKey, Record<Language, string>> = {
   "results.save_your":     { pt: "Salve suas receitas favoritas para acessá-las facilmente depois!", en: "Save your favorite recipes to access them easily later!" },
   "results.no_results":    { pt: "Nenhuma receita encontrada. Tente adicionar mais ingredientes ou verificar a ortografia.", en: "No recipes found. Try adding more ingredients or checking the spelling." },
   "results.go_back":       { pt: "Voltar para a busca", en: "Go back to search" },
-};
-
-// ── Ingredient map (PT) ───────────────────────────────────────────────────────
-const ingredientMap: Record<string, string> = {
-  chicken: "Frango", beef: "Carne bovina", pork: "Porco", fish: "Peixe", egg: "Ovo",
-  onion: "Cebola", garlic: "Alho", tomato: "Tomate", potato: "Batata", carrot: "Cenoura",
-  broccoli: "Brócolis", pepper: "Pimentão", lettuce: "Alface",
-  rice: "Arroz", pasta: "Macarrão", beans: "Feijão", flour: "Farinha",
-  sugar: "Açúcar", salt: "Sal", oil: "Óleo",
-  milk: "Leite", butter: "Manteiga", cheese: "Queijo",
-};
-
-export function translateIngredient(name: string, lang: Language): string {
-  if (lang === "en") return name;
-  return ingredientMap[name.toLowerCase()] ?? name;
-}
+} as const;
 
 // ── Context ───────────────────────────────────────────────────────────────────
 interface LanguageContextType {
@@ -264,7 +146,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   );
 
   const tIngredient = useCallback(
-    (name: string): string => translateIngredient(name, language),
+    (name: string): string => toDisplayIngredient(name, language),
     [language]
   );
 

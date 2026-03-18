@@ -1,3 +1,5 @@
+import { toApiIngredient } from "../i18n/ingredientMap";
+
 const BASE_URL = "https://www.themealdb.com/api/json/v1/1";
 
 export interface MealSummary {
@@ -41,7 +43,8 @@ function parseMealDetail(meal: Record<string, string | null>): MealDetail {
 }
 
 export async function searchByIngredient(ingredient: string): Promise<MealSummary[]> {
-  const res = await fetch(`${BASE_URL}/filter.php?i=${encodeURIComponent(ingredient)}`);
+  const apiIngredient = toApiIngredient(ingredient);
+  const res = await fetch(`${BASE_URL}/filter.php?i=${encodeURIComponent(apiIngredient)}`);
   const data = await res.json();
   return data.meals || [];
 }
