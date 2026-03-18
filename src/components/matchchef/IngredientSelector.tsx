@@ -1,7 +1,9 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect} from "react";
 import { View, Text, Pressable, TextInput, StyleSheet } from "react-native";
-import { Search, Plus, X } from "lucide-react-native";
+import { Search, Plus, X, Star } from "lucide-react-native";
 import { ingredients, categoryInfo, type IngredientCategory } from "../../data/ingredients";
+import { useCustomIngredients } from "../../hooks/useCustomIngredients";
+import { AddCustomIngredientModal } from "../matchchef/AddCustomIngredientModal";
 
 interface IngredientSelectorProps {
   selected: Set<string>;
@@ -10,36 +12,66 @@ interface IngredientSelectorProps {
 
 export function IngredientSelector({ selected, onToggle }: IngredientSelectorProps) {
   const [query, setQuery] = useState("");
+  const [pendingName, setPendingName] = useState<string | null>(null);
   const categories = Object.keys(categoryInfo) as IngredientCategory[];
+
+  const {
+    customIngredients,
+    loaded,
+    addCustomIngredient,
+    removeCustomIngredient,
+    alwaysBuyIds,
+    customCategories,
+  } = useCustomIngredients();
+
+  useEffect(() => {
+    if (!loaded) return;
+    for (const id of alwaysBuyIds) {
+      if (!selected.has(id)) onToggle(id);
+    }
+  }, [loaded]);
 
   const filtered = useMemo(() => {
     if (!query.trim()) return null;
     const q = query.toLowerCase();
-    return ingredients.filter(
+    const fromFixed = ingredients.filter(
       (i) => i.name.toLowerCase().includes(q) || i.id.toLowerCase().includes(q)
     );
-  }, [query]);
+    const fromCustom = customIngredients.filter(
+      (i) => i.name.toLowerCase().includes(q) || i.id.toLowerCase().includes(q)
+    );
+    return { fixed: fromFixed, custom: fromCustom };
+  }, [query, customIngredients]);
 
-  const isCustom = query.trim().length > 0 && filtered?.length === 0;
-
-  const handleAddCustom = () => {
-    if (!query.trim()) return;
-    const id = query.trim().toLowerCase();
-    onToggle(id);
-    setQuery("");
-  };
+  const hasFilteredResults =
+    filtered && (filtered.fixed.length > 0 || filtered.custom.length > 0);
+  const isCustom = query.trim().length > 0 && !hasFilteredResults;
 
   const handleSubmit = () => {
-    if (filtered && filtered.length === 1) {
-      onToggle(filtered[0].id);
+    if (filtered?.fixed.length === 1 && filtered.custom.length === 0) {
+      onToggle(filtered.fixed[0].id);
+      setQuery("");
+    } else if (filtered?.custom.length === 1 && filtered.fixed.length === 0) {
+      onToggle(filtered.custom[0].id);
       setQuery("");
     } else if (isCustom) {
-      handleAddCustom();
+      setPendingName(query.trim());
     }
   };
 
+  // Agrupa customizados por categoria
+  const customByCategory = useMemo(() => {
+    const map: Record<string, typeof customIngredients> = {};
+    for (const ing of customIngredients) {
+      const cat = ing.category || "Outros";
+      if (!map[cat]) map[cat] = [];
+      map[cat].push(ing);
+    }
+    return map;
+  }, [customIngredients]);
+
   const fixedIds = new Set(ingredients.map((i) => i.id));
-  const customSelected = Array.from(selected).filter((id) => !fixedIds.has(id));
+  const totalSelected = selected.size;
 
   return (
     <View>
@@ -65,9 +97,12 @@ export function IngredientSelector({ selected, onToggle }: IngredientSelectorPro
         )}
       </View>
 
-      {/* Adicionar ingrediente customizado */}
+      {/* Botão adicionar customizado */}
       {isCustom && (
-        <Pressable onPress={handleAddCustom} style={styles.addCustomBtn}>
+        <Pressable
+          onPress={() => setPendingName(query.trim())}
+          style={styles.addCustomBtn}
+        >
           <Plus size={16} color="hsl(25,90%,55%)" />
           <Text style={styles.addCustomText}>
             Adicionar <Text style={styles.addCustomHighlight}>"{query.trim()}"</Text>
@@ -76,9 +111,9 @@ export function IngredientSelector({ selected, onToggle }: IngredientSelectorPro
       )}
 
       {/* Resultados filtrados */}
-      {filtered && filtered.length > 0 && (
+      {hasFilteredResults && (
         <View style={styles.filteredRow}>
-          {filtered.map((ing) => {
+          {filtered.fixed.map((ing) => {
             const isSelected = selected.has(ing.id);
             return (
               <Pressable
@@ -93,31 +128,66 @@ export function IngredientSelector({ selected, onToggle }: IngredientSelectorPro
               </Pressable>
             );
           })}
+          {filtered.custom.map((ing) => {
+            const isSelected = selected.has(ing.id);
+            return (
+              <Pressable
+                key={ing.id}
+                onPress={() => { onToggle(ing.id); setQuery(""); }}
+                style={[styles.chip, isSelected && styles.chipSelected]}
+              >
+                {ing.alwaysBuy && <Star size={11} color={isSelected ? "#fff" : "#facc15"} fill={isSelected ? "#fff" : "#facc15"} />}
+                <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                  {ing.name}
+                </Text>
+              </Pressable>
+            );
+          })}
         </View>
       )}
 
-      {/* Lista por categoria (quando não há busca) */}
+      {/* Lista por categoria (sem busca) */}
       {!query.trim() && (
         <View style={styles.categoriesContainer}>
 
-          {/* Ingredientes customizados selecionados */}
-          {customSelected.length > 0 && (
-            <View style={styles.customSection}>
-              <Text style={styles.categoryLabel}>➕ Adicionados por você</Text>
+          {/* Categorias customizadas do usuário */}
+          {Object.entries(customByCategory).map(([cat, items]) => (
+            <View key={cat} style={styles.category}>
+              <Text style={styles.categoryLabel}>✨ {cat}</Text>
               <View style={styles.chipsRow}>
-                {customSelected.map((id) => (
-                  <Pressable
-                    key={id}
-                    onPress={() => onToggle(id)}
-                    style={[styles.chip, styles.chipSelected]}
-                  >
-                    <Text style={styles.chipTextSelected}>{id}</Text>
-                    <X size={12} color="#fff" />
-                  </Pressable>
-                ))}
+                {items.map((ing) => {
+                  const isSelected = selected.has(ing.id);
+                  return (
+                    <Pressable
+                      key={ing.id}
+                      onPress={() => onToggle(ing.id)}
+                      style={[styles.chip, isSelected && styles.chipSelected]}
+                      onLongPress={() => removeCustomIngredient(ing.id)}
+                    >
+                      {ing.alwaysBuy && (
+                        <Star
+                          size={11}
+                          color={isSelected ? "#fff" : "#facc15"}
+                          fill={isSelected ? "#fff" : "#facc15"}
+                        />
+                      )}
+                      <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
+                        {ing.name}
+                      </Text>
+                      {!isSelected && (
+                        <Pressable
+                          onPress={() => removeCustomIngredient(ing.id)}
+                          hitSlop={8}
+                        >
+                          <X size={10} color="#555" />
+                        </Pressable>
+                      )}
+                    </Pressable>
+                  );
+                })}
               </View>
             </View>
-          )}
+          ))}
 
           {/* Categorias fixas */}
           {categories.map((cat) => {
@@ -150,13 +220,27 @@ export function IngredientSelector({ selected, onToggle }: IngredientSelectorPro
       )}
 
       {/* Contador */}
-      {selected.size > 0 && (
+      {totalSelected > 0 && (
         <View style={styles.countBadge}>
           <Text style={styles.countText}>
-            ✨ {selected.size} ingrediente{selected.size > 1 ? "s" : ""} selecionado{selected.size > 1 ? "s" : ""}
+            ✨ {totalSelected} ingrediente{totalSelected > 1 ? "s" : ""} selecionado{totalSelected > 1 ? "s" : ""}
           </Text>
         </View>
       )}
+
+      {/* Modal de adicionar customizado */}
+      <AddCustomIngredientModal
+        visible={!!pendingName}
+        ingredientName={pendingName || ""}
+        existingCategories={customCategories}
+        onConfirm={(ingredient) => {
+          addCustomIngredient(ingredient);
+          onToggle(ingredient.id);
+          setQuery("");
+          setPendingName(null);
+        }}
+        onClose={() => setPendingName(null)}
+      />
     </View>
   );
 }
@@ -226,9 +310,6 @@ const styles = StyleSheet.create({
   },
   categoriesContainer: {
     gap: 16,
-  },
-  customSection: {
-    gap: 8,
   },
   category: {
     gap: 8,
