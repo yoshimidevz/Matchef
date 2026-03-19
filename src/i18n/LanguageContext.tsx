@@ -110,6 +110,15 @@ export const translations = {
   "results.save_your":     { pt: "Salve suas receitas favoritas para acessá-las facilmente depois!", en: "Save your favorite recipes to access them easily later!" },
   "results.no_results":    { pt: "Nenhuma receita encontrada. Tente adicionar mais ingredientes ou verificar a ortografia.", en: "No recipes found. Try adding more ingredients or checking the spelling." },
   "results.go_back":       { pt: "Voltar para a busca", en: "Go back to search" },
+  "nav.recipes":               { pt: "Receitas",    en: "Recipes" },
+  "recipes.title":             { pt: "Buscar receitas", en: "Search recipes" },
+  "recipes.subtitle":          { pt: "Encontre receitas pelo nome", en: "Find recipes by name" },
+  "recipes.placeholder":       { pt: "Ex: frango, sushi, risoto...", en: "E.g.: chicken, sushi, risotto..." },
+  "recipes.search_btn":        { pt: "Buscar", en: "Search" },
+  "recipes.no_results":        { pt: "Nenhuma receita encontrada", en: "No recipes found" },
+  "recipes.no_results_hint":   { pt: "Tente outro nome ou verifique a ortografia", en: "Try another name or check the spelling" },
+  "recipes.initial_text":      { pt: "Digite o nome de uma receita para começar", en: "Type a recipe name to get started" },
+  "recipes.ingredients_count": { pt: "ingredientes", en: "ingredients" },
 } as const;
 
 export type TranslationKey = keyof typeof translations

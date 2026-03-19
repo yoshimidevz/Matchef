@@ -3,6 +3,7 @@
     "name": "Matchef",
     "slug": "Matchef",
     "version": "1.0.0",
+    "scheme": "matchef",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
