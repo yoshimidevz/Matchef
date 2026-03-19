@@ -5,7 +5,7 @@ import {
 } from "react-native";
 import { X, Globe, Tag, Youtube, RefreshCw, Recycle } from "lucide-react-native";
 import { getMealById, type MealDetail } from "../../services/mealApi";
-import { useLanguage, type Language } from "../../i18n/LanguageContext";
+import { useLanguage, useTranslatedIngredients, type Language } from "../../i18n/LanguageContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const SUBSTITUTIONS: Record<string, { pt: string; en: string }> = {
@@ -61,15 +61,18 @@ function getZeroWasteDetail(meal: MealDetail, lang: Language) {
   return null;
 }
 
-function SubTooltip({ ingredient, sub, lang }: { ingredient: string; sub: string; lang: Language }) {
+function SubTooltip({ ingredient, translatedName, sub, lang }: {
+  ingredient: string;
+  translatedName: string;
+  sub: string;
+  lang: Language;
+}) {
   const [open, setOpen] = useState(false);
-  const { t, tIngredient } = useLanguage();
+  const { t } = useLanguage();
+
   return (
     <View>
-      <Pressable
-        onPress={() => setOpen(!open)}
-        style={styles.subBtn}
-      >
+      <Pressable onPress={() => setOpen(!open)} style={styles.subBtn}>
         <RefreshCw size={14} color="#22c55e" />
       </Pressable>
       {open && (
@@ -77,10 +80,11 @@ function SubTooltip({ ingredient, sub, lang }: { ingredient: string; sub: string
           <Text style={styles.subTooltipTitle}>{t("substitution.title")}</Text>
           <Text style={styles.subTooltipText}>
             {t("substitution.missing_prefix")}{" "}
-            <Text style={{ color: "hsl(25,90%,55%)" }}>{tIngredient(ingredient)}</Text>?
+            <Text style={{ color: "hsl(25,90%,55%)" }}>{translatedName}</Text>?
           </Text>
           <Text style={styles.subTooltipSub}>
-            {t("substitution.swap")} <Text style={{ fontWeight: "700", color: "#fff" }}>{sub}</Text>
+            {t("substitution.swap")}{" "}
+            <Text style={{ fontWeight: "700", color: "#fff" }}>{sub}</Text>
           </Text>
         </View>
       )}
@@ -88,6 +92,7 @@ function SubTooltip({ ingredient, sub, lang }: { ingredient: string; sub: string
   );
 }
 
+// ── Main Component ────────────────────────────────────────────────────────────
 interface ApiRecipeDetailProps {
   mealId: string | null;
   meal?: MealDetail | null;
@@ -98,8 +103,16 @@ interface ApiRecipeDetailProps {
 export function ApiRecipeDetail({ mealId, meal: preloaded, onClose, zeroWaste }: ApiRecipeDetailProps) {
   const [meal, setMeal] = useState<MealDetail | null>(preloaded || null);
   const [loading, setLoading] = useState(!preloaded);
-  const { t, tIngredient, language } = useLanguage();
+  const { t, language } = useLanguage();
   const insets = useSafeAreaInsets();
+
+  const ingredientNames = meal?.ingredients.map((i) => i.ingredient) ?? [];
+  const translatedIngredients = useTranslatedIngredients(ingredientNames);
+
+  const zwDetail = meal ? getZeroWasteDetail(meal, language) : null;
+  const translatedZwIngredient = useTranslatedIngredients(
+    zwDetail ? [zwDetail.ingredient] : []
+  );
 
   useEffect(() => {
     if (preloaded) { setMeal(preloaded); setLoading(false); return; }
@@ -129,12 +142,7 @@ export function ApiRecipeDetail({ mealId, meal: preloaded, onClose, zeroWaste }:
           </View>
         ) : meal ? (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 120 }}>
-            {/* Hero image */}
-            <Image
-              source={{ uri: meal.strMealThumb }}
-              style={styles.heroImage}
-              resizeMode="cover"
-            />
+            <Image source={{ uri: meal.strMealThumb }} style={styles.heroImage} resizeMode="cover" />
 
             <View style={styles.content}>
               {/* Tags */}
@@ -160,30 +168,26 @@ export function ApiRecipeDetail({ mealId, meal: preloaded, onClose, zeroWaste }:
                   : null}
               </View>
 
-              {/* Zero Waste card */}
-              {zeroWaste && (() => {
-                const zw = getZeroWasteDetail(meal, language);
-                if (!zw) return null;
-                return (
-                  <View style={styles.zeroWasteCard}>
-                    <View style={[styles.zeroWasteIcon]}>
-                      <Recycle size={20} color="#22c55e" />
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.zeroWasteTitle}>{t("zerowaste.magic_title")}</Text>
-                      <Text style={styles.zeroWasteDesc}>
-                        {t("zerowaste.description_prefix")}{" "}
-                        <Text style={{ fontWeight: "700", color: "#fff" }}>
-                          {zw.part.toLowerCase()} {language === "pt" ? "de" : "of"}{" "}
-                          {tIngredient(zw.ingredient).toLowerCase()}
-                        </Text>{" "}
-                        {t("zerowaste.description_mid")}{" "}
-                        <Text style={{ fontWeight: "700", color: "#22c55e" }}>{zw.transform}</Text>.
-                      </Text>
-                    </View>
+              {/* Zero Waste */}
+              {zeroWaste && zwDetail && (
+                <View style={styles.zeroWasteCard}>
+                  <View style={styles.zeroWasteIcon}>
+                    <Recycle size={20} color="#22c55e" />
                   </View>
-                );
-              })()}
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.zeroWasteTitle}>{t("zerowaste.magic_title")}</Text>
+                    <Text style={styles.zeroWasteDesc}>
+                      {t("zerowaste.description_prefix")}{" "}
+                      <Text style={{ fontWeight: "700", color: "#fff" }}>
+                        {zwDetail.part.toLowerCase()} {language === "pt" ? "de" : "of"}{" "}
+                        {(translatedZwIngredient[0] ?? zwDetail.ingredient).toLowerCase()}
+                      </Text>{" "}
+                      {t("zerowaste.description_mid")}{" "}
+                      <Text style={{ fontWeight: "700", color: "#22c55e" }}>{zwDetail.transform}</Text>.
+                    </Text>
+                  </View>
+                </View>
+              )}
 
               {/* Ingredients */}
               <Text style={styles.sectionTitle}>
@@ -191,16 +195,24 @@ export function ApiRecipeDetail({ mealId, meal: preloaded, onClose, zeroWaste }:
               </Text>
               {meal.ingredients.map((item, i) => {
                 const sub = getSubstitution(item.ingredient, language);
+                const translatedName = translatedIngredients[i] ?? item.ingredient;
                 return (
                   <View key={i} style={styles.ingredientRow}>
                     <View style={styles.ingredientNum}>
                       <Text style={styles.ingredientNumText}>{i + 1}</Text>
                     </View>
                     <Text style={styles.ingredientName} numberOfLines={1}>
-                      {tIngredient(item.ingredient)}
+                      {translatedName}
                     </Text>
                     <Text style={styles.ingredientMeasure}>{item.measure}</Text>
-                    {sub ? <SubTooltip ingredient={item.ingredient} sub={sub} lang={language} /> : null}
+                    {sub ? (
+                      <SubTooltip
+                        ingredient={item.ingredient}
+                        translatedName={translatedName}
+                        sub={sub}
+                        lang={language}
+                      />
+                    ) : null}
                   </View>
                 );
               })}
@@ -215,10 +227,7 @@ export function ApiRecipeDetail({ mealId, meal: preloaded, onClose, zeroWaste }:
 
               {/* YouTube */}
               {meal.strYoutube ? (
-                <Pressable
-                  onPress={() => Linking.openURL(meal.strYoutube)}
-                  style={styles.youtubeBtn}
-                >
+                <Pressable onPress={() => Linking.openURL(meal.strYoutube)} style={styles.youtubeBtn}>
                   <Youtube size={18} color="hsl(25,90%,55%)" />
                   <Text style={styles.youtubeBtnText}>{t("detail.youtube")}</Text>
                 </Pressable>
@@ -232,7 +241,6 @@ export function ApiRecipeDetail({ mealId, meal: preloaded, onClose, zeroWaste }:
           </View>
         )}
 
-        {/* CTA */}
         {meal && !loading && (
           <View style={[styles.ctaContainer, { paddingBottom: insets.bottom || 16 }]}>
             <Pressable style={styles.ctaBtn} onPress={onClose}>
@@ -248,12 +256,9 @@ export function ApiRecipeDetail({ mealId, meal: preloaded, onClose, zeroWaste }:
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0f0f0f" },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(255,255,255,0.08)",
+    flexDirection: "row", alignItems: "center",
+    paddingHorizontal: 16, paddingVertical: 12,
+    borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.08)",
     backgroundColor: "rgba(15,15,15,0.9)",
   },
   headerTitle: { flex: 1, fontSize: 17, fontWeight: "800", color: "#fff", marginRight: 12 },
@@ -277,9 +282,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4, borderRadius: 99,
   },
   tagAccentText: { fontSize: 11, fontWeight: "700", color: "#a78bfa" },
-  tagMuted: {
-    backgroundColor: "#1a1a1a", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 99,
-  },
+  tagMuted: { backgroundColor: "#1a1a1a", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 99 },
   tagMutedText: { fontSize: 11, color: "#666" },
   zeroWasteCard: {
     flexDirection: "row", gap: 12, alignItems: "flex-start",
@@ -317,13 +320,9 @@ const styles = StyleSheet.create({
   subTooltipTitle: { fontSize: 10, fontWeight: "700", color: "#555", marginBottom: 4 },
   subTooltipText: { fontSize: 13, fontWeight: "600", color: "#fff" },
   subTooltipSub: { fontSize: 13, color: "#888", marginTop: 4 },
-  instructionsCard: {
-    backgroundColor: "#1a1a1a", borderRadius: 16, padding: 16,
-  },
+  instructionsCard: { backgroundColor: "#1a1a1a", borderRadius: 16, padding: 16 },
   instructions: { fontSize: 14, color: "rgba(255,255,255,0.75)", lineHeight: 22 },
-  youtubeBtn: {
-    flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4,
-  },
+  youtubeBtn: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 4 },
   youtubeBtnText: { fontSize: 14, fontWeight: "700", color: "hsl(25,90%,55%)" },
   ctaContainer: {
     position: "absolute", bottom: 0, left: 0, right: 0,

@@ -11,7 +11,7 @@ import { Header } from "../src/components/matchchef/Header";
 import { BottomNav } from "../src/components/matchchef/BottomNav";
 import { ApiRecipeDetail } from "../src/components/matchchef/ApiRecipeDetail";
 import { searchByIngredient, getMealById, type MealSummary, type MealDetail } from "../src/services/mealApi";
-import { useLanguage } from "../src/i18n/LanguageContext";
+import { useLanguage, useTranslatedIngredients } from "../src/i18n/LanguageContext";
 
 // ── Substitutions ─────────────────────────────────────────────────────────────
 const SUBSTITUTIONS: Record<string, { pt: string; en: string }> = {
@@ -41,7 +41,6 @@ function getSubstitution(ingredient: string, lang: "pt" | "en"): string | null {
   return null;
 }
 
-// ── Types ─────────────────────────────────────────────────────────────────────
 interface EnrichedMeal {
   summary: MealSummary;
   detail: MealDetail | null;
@@ -53,16 +52,16 @@ interface EnrichedMeal {
   urgentMatches: string[];
 }
 
-// ── SubTooltip inline ─────────────────────────────────────────────────────────
-function SubTooltip({ ingredient, sub }: { ingredient: string; sub: string }) {
+function SubTooltip({ translatedName, sub }: {
+  translatedName: string;
+  sub: string;
+}) {
   const [open, setOpen] = useState(false);
-  const { t, tIngredient } = useLanguage();
+  const { t } = useLanguage();
+
   return (
     <View>
-      <Pressable
-        onPress={(e) => { setOpen(!open); }}
-        style={styles.subBtn}
-      >
+      <Pressable onPress={() => setOpen(!open)} style={styles.subBtn}>
         <RefreshCw size={10} color="#22c55e" />
       </Pressable>
       {open && (
@@ -70,7 +69,7 @@ function SubTooltip({ ingredient, sub }: { ingredient: string; sub: string }) {
           <Text style={styles.subTooltipTitle}>{t("substitution.title")}</Text>
           <Text style={styles.subTooltipText}>
             {t("substitution.missing_prefix")}{" "}
-            <Text style={{ color: "hsl(25,90%,55%)" }}>{tIngredient(ingredient)}</Text>?
+            <Text style={{ color: "hsl(25,90%,55%)" }}>{translatedName}</Text>?
           </Text>
           <Text style={styles.subTooltipSub}>
             {t("substitution.swap")}{" "}
@@ -82,7 +81,6 @@ function SubTooltip({ ingredient, sub }: { ingredient: string; sub: string }) {
   );
 }
 
-// ── Main Screen ───────────────────────────────────────────────────────────────
 export default function Resultados() {
   const router = useRouter();
   const params = useLocalSearchParams<{
@@ -90,7 +88,7 @@ export default function Resultados() {
     zeroWaste: string;
     urgent: string;
   }>();
-  const { t, tIngredient, language } = useLanguage();
+  const { t, language } = useLanguage();
   const insets = useSafeAreaInsets();
 
   const ingredientsParam = params.ingredients || "";
@@ -109,9 +107,29 @@ export default function Resultados() {
   const [selectedMealId, setSelectedMealId] = useState<string | null>(null);
   const [selectedMealDetail, setSelectedMealDetail] = useState<MealDetail | null>(null);
 
+  const translatedUserIngredients = useTranslatedIngredients(userIngredients);
+
+  const urgentMatchNames = useMemo(
+    () => enriched.map((m) => m.urgentMatches[0] ?? ""),
+    [enriched]
+  );
+  const translatedUrgentMatches = useTranslatedIngredients(urgentMatchNames);
+
+  const missingIngredientNames = useMemo(
+    () => enriched.flatMap((m) => m.missingIngredients.slice(0, 3).map((i) => i.ingredient)),
+    [enriched]
+  );
+  const translatedMissing = useTranslatedIngredients(missingIngredientNames);
+
+  const getMissingTranslated = useCallback((mealIndex: number, ingIndex: number): string => {
+    const offset = enriched
+      .slice(0, mealIndex)
+      .reduce((acc, m) => acc + Math.min(m.missingIngredients.length, 3), 0);
+    return translatedMissing[offset + ingIndex] ?? enriched[mealIndex]?.missingIngredients[ingIndex]?.ingredient ?? "";
+  }, [enriched, translatedMissing]);
+
   useEffect(() => {
     if (userIngredients.length === 0) return;
-
     setLoading(true);
     setNoResults(false);
 
@@ -128,7 +146,6 @@ export default function Resultados() {
           }
         }
         setLoading(false);
-
         if (merged.length === 0) { setNoResults(true); return; }
 
         setEnriching(true);
@@ -226,13 +243,13 @@ export default function Resultados() {
 
         {/* Ingredient chips */}
         <View style={styles.chipsRow}>
-          {userIngredients.map((name) => {
+          {userIngredients.map((name, i) => {
             const isUrgent = urgentIngredients.has(name);
             return (
               <View key={name} style={[styles.chip, isUrgent && styles.chipUrgent]}>
                 {isUrgent && <AlarmClock size={11} color="#ef4444" />}
                 <Text style={[styles.chipText, isUrgent && styles.chipTextUrgent]}>
-                  {tIngredient(name)}
+                  {translatedUserIngredients[i] ?? name}
                 </Text>
               </View>
             );
@@ -266,7 +283,7 @@ export default function Resultados() {
         {/* Results */}
         {!loading && enriched.length > 0 && (
           <View style={styles.resultsList}>
-            {enriched.map((meal) => (
+            {enriched.map((meal, mealIndex) => (
               <Pressable
                 key={meal.summary.idMeal}
                 onPress={() => handleSelect(meal)}
@@ -277,13 +294,12 @@ export default function Resultados() {
                   <View style={styles.urgentBadge}>
                     <AlarmClock size={10} color="#ef4444" />
                     <Text style={styles.urgentBadgeText}>
-                      {t("results.save_your")} {tIngredient(meal.urgentMatches[0])}!
+                      {t("results.save_your")} {translatedUrgentMatches[mealIndex] ?? meal.urgentMatches[0]}!
                     </Text>
                   </View>
                 )}
 
                 <View style={[styles.resultRow, meal.hasUrgentIngredient && { paddingTop: 8 }]}>
-                  {/* Thumbnail */}
                   <Image
                     source={{ uri: meal.summary.strMealThumb }}
                     style={styles.thumbnail}
@@ -291,7 +307,6 @@ export default function Resultados() {
                   />
 
                   <View style={styles.resultInfo}>
-                    {/* Title + 100% badge */}
                     <View style={styles.titleRow}>
                       <Text style={styles.mealName} numberOfLines={1}>
                         {meal.summary.strMeal}
@@ -303,7 +318,6 @@ export default function Resultados() {
                       )}
                     </View>
 
-                    {/* Progress bar */}
                     <View style={styles.barBg}>
                       <View
                         style={[
@@ -323,16 +337,20 @@ export default function Resultados() {
                       meal.missingIngredients.length <= 4 && (
                         <View style={styles.missingRow}>
                           <Text style={styles.missingLabel}>{t("results.missing")}</Text>
-                          {meal.missingIngredients.slice(0, 3).map((ing) => {
+                          {meal.missingIngredients.slice(0, 3).map((ing, ingIndex) => {
                             const sub = getSubstitution(ing.ingredient, language);
+                            const translatedName = getMissingTranslated(mealIndex, ingIndex);
                             return (
                               <View key={ing.ingredient} style={styles.missingItem}>
                                 <View style={styles.missingChip}>
-                                  <Text style={styles.missingChipText}>
-                                    {tIngredient(ing.ingredient)}
-                                  </Text>
+                                  <Text style={styles.missingChipText}>{translatedName}</Text>
                                 </View>
-                                {sub && <SubTooltip ingredient={ing.ingredient} sub={sub} />}
+                                {sub && (
+                                  <SubTooltip
+                                    translatedName={translatedName}
+                                    sub={sub}
+                                  />
+                                )}
                               </View>
                             );
                           })}
@@ -378,7 +396,6 @@ const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#0f0f0f" },
   scroll: { flex: 1 },
   content: { paddingHorizontal: 16, paddingTop: 8, gap: 12 },
-
   pageHeader: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8 },
   backBtn: {
     width: 40, height: 40, borderRadius: 20,
@@ -387,34 +404,24 @@ const styles = StyleSheet.create({
   pageTitle: { fontSize: 17, fontWeight: "800", color: "#fff" },
   pageSubtitle: { fontSize: 11, color: "#555", marginTop: 2 },
   urgentCount: { color: "#ef4444", fontWeight: "700" },
-
   chipsRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
   chip: {
     flexDirection: "row", alignItems: "center", gap: 4,
     backgroundColor: "#1a1a1a", paddingHorizontal: 10, paddingVertical: 5,
     borderRadius: 99, borderWidth: 1, borderColor: "rgba(255,255,255,0.08)",
   },
-  chipUrgent: {
-    backgroundColor: "rgba(239,68,68,0.08)",
-    borderColor: "rgba(239,68,68,0.4)",
-  },
+  chipUrgent: { backgroundColor: "rgba(239,68,68,0.08)", borderColor: "rgba(239,68,68,0.4)" },
   chipText: { fontSize: 11, fontWeight: "700", color: "#aaa" },
   chipTextUrgent: { color: "#ef4444" },
-
   skeletonList: { gap: 10 },
-  skeletonCard: {
-    flexDirection: "row", gap: 12,
-    backgroundColor: "#1a1a1a", borderRadius: 16, padding: 12,
-  },
+  skeletonCard: { flexDirection: "row", gap: 12, backgroundColor: "#1a1a1a", borderRadius: 16, padding: 12 },
   skeletonImage: { width: 80, height: 80, borderRadius: 12, backgroundColor: "#2a2a2a" },
   skeletonInfo: { flex: 1, gap: 8, paddingVertical: 4 },
   skeletonTitle: { height: 14, width: "75%", borderRadius: 8, backgroundColor: "#2a2a2a" },
   skeletonLine: { height: 11, width: "100%", borderRadius: 8, backgroundColor: "#2a2a2a" },
   skeletonBar: { height: 6, width: "100%", borderRadius: 99, backgroundColor: "#2a2a2a" },
-
   enrichingRow: { flexDirection: "row", alignItems: "center", gap: 8, justifyContent: "center" },
   enrichingText: { fontSize: 12, color: "#555" },
-
   resultsList: { gap: 10 },
   resultCard: {
     backgroundColor: "#1a1a1a", borderRadius: 16,
@@ -427,45 +434,32 @@ const styles = StyleSheet.create({
   },
   urgentBadge: {
     flexDirection: "row", alignItems: "center", gap: 4,
-    backgroundColor: "rgba(239,68,68,0.12)",
-    paddingHorizontal: 8, paddingVertical: 4, borderRadius: 99,
-    alignSelf: "flex-start", marginBottom: 6,
-    borderWidth: 1, borderColor: "rgba(239,68,68,0.3)",
+    backgroundColor: "rgba(239,68,68,0.12)", paddingHorizontal: 8,
+    paddingVertical: 4, borderRadius: 99, alignSelf: "flex-start",
+    marginBottom: 6, borderWidth: 1, borderColor: "rgba(239,68,68,0.3)",
   },
   urgentBadgeText: { fontSize: 10, fontWeight: "700", color: "#ef4444" },
-
   resultRow: { flexDirection: "row", gap: 12 },
   thumbnail: { width: 80, height: 80, borderRadius: 12, backgroundColor: "#2a2a2a" },
   resultInfo: { flex: 1, gap: 4 },
-
   titleRow: { flexDirection: "row", alignItems: "center", gap: 6 },
   mealName: { flex: 1, fontSize: 14, fontWeight: "800", color: "#fff" },
-  perfectBadge: {
-    backgroundColor: "rgba(255,120,50,0.15)",
-    paddingHorizontal: 6, paddingVertical: 2, borderRadius: 99,
-  },
+  perfectBadge: { backgroundColor: "rgba(255,120,50,0.15)", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 99 },
   perfectBadgeText: { fontSize: 10, fontWeight: "700", color: "hsl(25,90%,55%)" },
-
   barBg: { height: 5, borderRadius: 99, backgroundColor: "#2a2a2a", overflow: "hidden" },
   barFill: { height: "100%", borderRadius: 99 },
   barFillPerfect: { backgroundColor: "hsl(25,90%,55%)" },
   barFillAlmost: { backgroundColor: "#facc15" },
   matchText: { fontSize: 10, color: "#555" },
-
   missingRow: { flexDirection: "row", flexWrap: "wrap", alignItems: "center", gap: 4, marginTop: 2 },
   missingLabel: { fontSize: 10, color: "#555", fontWeight: "600" },
   missingItem: { flexDirection: "row", alignItems: "center", gap: 2 },
-  missingChip: {
-    backgroundColor: "#2a2a2a", paddingHorizontal: 6,
-    paddingVertical: 2, borderRadius: 99,
-  },
+  missingChip: { backgroundColor: "#2a2a2a", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 99 },
   missingChipText: { fontSize: 10, color: "#666" },
   missingMore: { fontSize: 10, color: "#555" },
-
   subBtn: {
     width: 18, height: 18, borderRadius: 9,
-    backgroundColor: "rgba(34,197,94,0.12)",
-    alignItems: "center", justifyContent: "center",
+    backgroundColor: "rgba(34,197,94,0.12)", alignItems: "center", justifyContent: "center",
   },
   subTooltip: {
     position: "absolute", right: 0, bottom: 22, width: 200,
@@ -475,7 +469,6 @@ const styles = StyleSheet.create({
   subTooltipTitle: { fontSize: 9, fontWeight: "700", color: "#555", marginBottom: 3 },
   subTooltipText: { fontSize: 12, fontWeight: "600", color: "#fff" },
   subTooltipSub: { fontSize: 12, color: "#888", marginTop: 3 },
-
   empty: { alignItems: "center", paddingVertical: 64, gap: 12 },
   emptyEmoji: { fontSize: 48 },
   emptyText: { fontSize: 14, fontWeight: "600", color: "#555", textAlign: "center" },

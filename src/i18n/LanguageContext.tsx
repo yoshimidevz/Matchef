@@ -1,12 +1,8 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { toDisplayIngredient } from "./ingredientMap";
+import { toDisplayIngredient, translateIngredientsBatch } from "../services/translationService";
 
-// ── Translations ──────────────────────────────────────────────────────────────
 export type Language = "pt" | "en";
-
-export type TranslationKey = keyof typeof translations;
-  
 
 export const translations = {
   "header.subtitle":              { pt: "Cozinhe com o que você tem", en: "Cook with what you have" },
@@ -116,12 +112,12 @@ export const translations = {
   "results.go_back":       { pt: "Voltar para a busca", en: "Go back to search" },
 } as const;
 
-// ── Context ───────────────────────────────────────────────────────────────────
+export type TranslationKey = keyof typeof translations
+
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: TranslationKey) => string;
-  tIngredient: (name: string) => string;
 }
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
@@ -145,13 +141,8 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
     [language]
   );
 
-  const tIngredient = useCallback(
-    (name: string): string => toDisplayIngredient(name, language),
-    [language]
-  );
-
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t, tIngredient }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );
@@ -161,4 +152,29 @@ export function useLanguage() {
   const ctx = useContext(LanguageContext);
   if (!ctx) throw new Error("useLanguage must be used within LanguageProvider");
   return ctx;
+}
+
+// ── Hooks de tradução de ingredientes ────────────────────────────────────────
+export function useTranslatedIngredient(apiName: string): string {
+  const { language } = useLanguage();
+  const [translated, setTranslated] = useState(apiName);
+
+  useEffect(() => {
+    if (language === "en") { setTranslated(apiName); return; }
+    toDisplayIngredient(apiName, "pt").then(setTranslated);
+  }, [apiName, language]);
+
+  return translated;
+}
+
+export function useTranslatedIngredients(apiNames: string[]): string[] {
+  const { language } = useLanguage();
+  const [translated, setTranslated] = useState<string[]>(apiNames);
+
+  useEffect(() => {
+    if (language === "en") { setTranslated(apiNames); return; }
+    translateIngredientsBatch(apiNames, "PT").then(setTranslated);
+  }, [JSON.stringify(apiNames), language]);
+
+  return translated;
 }
