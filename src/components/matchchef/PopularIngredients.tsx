@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { View, Text, Pressable, ScrollView, StyleSheet } from "react-native";
 import { Check } from "lucide-react-native";
-import { useLanguage, type TranslationKey } from "../../i18n/LanguageContext";
+import { useLanguage, useTranslatedIngredient, useTranslatedIngredients, type TranslationKey } from "../../i18n/LanguageContext";
 
 interface PopularIngredientsProps {
   selected: Set<string>;
@@ -68,10 +68,12 @@ const categories: { id: string; labelKey: TranslationKey; emoji: string; items: 
 ];
 
 export function PopularIngredients({ selected, onToggle }: PopularIngredientsProps) {
-  const { t, tIngredient } = useLanguage();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("proteinas");
 
   const activeCategory = categories.find((c) => c.id === activeTab)!;
+  const itemNames = activeCategory.items.map((i) => i.name);
+  const translatedNames = useTranslatedIngredients(itemNames);
 
   return (
     <View>
@@ -123,7 +125,7 @@ export function PopularIngredients({ selected, onToggle }: PopularIngredientsPro
                   style={[styles.ingredientLabel, isSelected && styles.ingredientLabelSelected]}
                   numberOfLines={1}
                 >
-                  {tIngredient(item.name)}
+                {translatedNames[i] ?? item.name}
                 </Text>
               </Pressable>
             </View>

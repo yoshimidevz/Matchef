@@ -14,13 +14,13 @@ import { HeroSearch } from "../src/components/matchchef/HeroSearch";
 import { PopularIngredients } from "../src/components/matchchef/PopularIngredients";
 import { DailyRecipes } from "../src/components/matchchef/DailyRecipes";
 import { ApiRecipeDetail } from "../src/components/matchchef/ApiRecipeDetail";
-import { useLanguage } from "../src/i18n/LanguageContext";
+import { useLanguage, useTranslatedIngredient, useTranslatedIngredients } from "../src/i18n/LanguageContext";
 import { type MealDetail } from "../src/services/mealApi";
 
 export default function Index() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { t, tIngredient } = useLanguage();
+  const { t } = useLanguage();
 
   const [selectedIngredients, setSelectedIngredients] = useState<Set<string>>(new Set());
   const [urgentIngredients, setUrgentIngredients] = useState<Set<string>>(new Set());
@@ -77,6 +77,8 @@ export default function Index() {
   const count = selectedIngredients.size;
   const shouldShowTooltip = showUrgentTooltip && count > 0 && !hasShownTooltip.current;
   if (shouldShowTooltip) hasShownTooltip.current = true;
+  const selectedArray = Array.from(selectedIngredients);
+  const translatedSelected = useTranslatedIngredients(selectedArray);
 
   return (
     <View style={styles.screen}>
@@ -104,7 +106,7 @@ export default function Index() {
                 >
                   <Pressable onPress={() => toggleIngredient(name)}>
                     <Text style={[styles.chipText, isUrgent && styles.chipTextUrgent]}>
-                      ✓ {tIngredient(name)}
+                      {translatedSelected[idx] ?? name}
                     </Text>
                   </Pressable>
 
