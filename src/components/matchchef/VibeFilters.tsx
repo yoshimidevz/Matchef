@@ -1,5 +1,6 @@
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { vibes } from "../../data/recipe";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface VibeFiltersProps {
   active: Set<string>;
@@ -7,9 +8,11 @@ interface VibeFiltersProps {
 }
 
 export function VibeFilters({ active, onToggle }: VibeFiltersProps) {
+  const { language, t } = useLanguage();
+
   return (
     <View>
-      <Text style={styles.title}>🎯 Filtro de Vibe</Text>
+      <Text style={styles.title}>{t("vibe_filters.title")}</Text>
       <View style={styles.row}>
         {vibes.map((vibe) => {
           const isActive = active.has(vibe.id);
@@ -20,7 +23,7 @@ export function VibeFilters({ active, onToggle }: VibeFiltersProps) {
               style={[styles.btn, isActive && styles.btnActive]}
             >
               <Text style={[styles.btnText, isActive && styles.btnTextActive]}>
-                {vibe.label}
+                {language === "en" ? vibe.labelEn : vibe.label}
               </Text>
             </Pressable>
           );

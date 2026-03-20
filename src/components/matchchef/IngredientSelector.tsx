@@ -1,7 +1,8 @@
 import { useState, useMemo, useEffect} from "react";
 import { View, Text, Pressable, TextInput, StyleSheet } from "react-native";
 import { Search, Plus, X, Star } from "lucide-react-native";
-import { ingredients, categoryInfo, type IngredientCategory } from "../../data/ingredients";
+import { useLanguage } from "../../i18n/LanguageContext";
+import { ingredients, categoryInfo, type IngredientCategory, getCategoryLabel, getIngredientName } from "../../data/ingredients";
 import { useCustomIngredients } from "../../hooks/useCustomIngredients";
 import { AddCustomIngredientModal } from "../matchchef/AddCustomIngredientModal";
 
@@ -14,6 +15,7 @@ export function IngredientSelector({ selected, onToggle }: IngredientSelectorPro
   const [query, setQuery] = useState("");
   const [pendingName, setPendingName] = useState<string | null>(null);
   const categories = Object.keys(categoryInfo) as IngredientCategory[];
+  const { language, t } = useLanguage();
 
   const {
     customIngredients,
@@ -35,7 +37,9 @@ export function IngredientSelector({ selected, onToggle }: IngredientSelectorPro
     if (!query.trim()) return null;
     const q = query.toLowerCase();
     const fromFixed = ingredients.filter(
-      (i) => i.name.toLowerCase().includes(q) || i.id.toLowerCase().includes(q)
+      (i) => i.name.toLowerCase().includes(q) ||
+            i.nameEn.toLowerCase().includes(q) ||
+            i.id.toLowerCase().includes(q)
     );
     const fromCustom = customIngredients.filter(
       (i) => i.name.toLowerCase().includes(q) || i.id.toLowerCase().includes(q)
@@ -75,8 +79,8 @@ export function IngredientSelector({ selected, onToggle }: IngredientSelectorPro
 
   return (
     <View>
-      <Text style={styles.title}>🧊 O que eu tenho na geladeira?</Text>
-      <Text style={styles.subtitle}>Toque nos ingredientes ou digite para buscar</Text>
+      <Text style={styles.title}>{t("pantry.title")}</Text>
+      <Text style={styles.subtitle}>{t("pantry.subtitle")}</Text>
 
       {/* Search input */}
       <View style={styles.inputRow}>
@@ -123,7 +127,7 @@ export function IngredientSelector({ selected, onToggle }: IngredientSelectorPro
               >
                 <Text style={styles.chipEmoji}>{ing.emoji}</Text>
                 <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
-                  {ing.name}
+                  {getIngredientName(ing, language)}
                 </Text>
               </Pressable>
             );
@@ -195,7 +199,7 @@ export function IngredientSelector({ selected, onToggle }: IngredientSelectorPro
             const catIngredients = ingredients.filter((i) => i.category === cat);
             return (
               <View key={cat} style={styles.category}>
-                <Text style={styles.categoryLabel}>{info.label}</Text>
+                <Text style={styles.categoryLabel}>{getCategoryLabel(cat, language)}</Text>
                 <View style={styles.chipsRow}>
                   {catIngredients.map((ing) => {
                     const isSelected = selected.has(ing.id);
@@ -207,7 +211,7 @@ export function IngredientSelector({ selected, onToggle }: IngredientSelectorPro
                       >
                         <Text style={styles.chipEmoji}>{ing.emoji}</Text>
                         <Text style={[styles.chipText, isSelected && styles.chipTextSelected]}>
-                          {ing.name}
+                          {getIngredientName(ing, language)}
                         </Text>
                       </Pressable>
                     );
@@ -223,7 +227,7 @@ export function IngredientSelector({ selected, onToggle }: IngredientSelectorPro
       {totalSelected > 0 && (
         <View style={styles.countBadge}>
           <Text style={styles.countText}>
-            ✨ {totalSelected} ingrediente{totalSelected > 1 ? "s" : ""} selecionado{totalSelected > 1 ? "s" : ""}
+            ✨ {totalSelected} {totalSelected === 1 ? t("cta.item") : t("cta.items")} {totalSelected === 1 ? t("pantry.selected") : t("pantry.selected_plural")}
           </Text>
         </View>
       )}

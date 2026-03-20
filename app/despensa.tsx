@@ -39,7 +39,7 @@ export default function Despensa() {
       >
         <ChefLevel
           level={chefLevel.level}
-          title={chefLevel.title}
+          titleKey={chefLevel.titleKey}
           progress={chefLevel.progress}
           completedRecipes={completedRecipes}
         />

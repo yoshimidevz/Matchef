@@ -5,6 +5,7 @@ import {
 } from "react-native";
 import { X, Plus, Star } from "lucide-react-native";
 import type { CustomIngredient } from "../../hooks/useCustomIngredients";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface AddCustomIngredientModalProps {
   visible: boolean;
@@ -26,6 +27,7 @@ export function AddCustomIngredientModal({
   onConfirm,
   onClose,
 }: AddCustomIngredientModalProps) {
+  const { t } = useLanguage();
   const [category, setCategory] = useState("");
   const [alwaysBuy, setAlwaysBuy] = useState(false);
   const [newCategoryInput, setNewCategoryInput] = useState("");
@@ -84,7 +86,7 @@ export function AddCustomIngredientModal({
                 <ScrollView
                     showsVerticalScrollIndicator={false}
                 >
-                <Text style={styles.label}>Em qual categoria ele fica?</Text>
+                <Text style={styles.label}>{t("add_custom_ingredient_modal.category_label")}</Text>
                 <View style={styles.categoriesGrid}>
                 {allCategories.map((cat) => (
                     <Pressable
@@ -136,8 +138,8 @@ export function AddCustomIngredientModal({
                 <View style={styles.alwaysBuyInfo}>
                     <Star size={18} color={alwaysBuy ? "#facc15" : "#555"} fill={alwaysBuy ? "#facc15" : "transparent"} />
                     <View>
-                    <Text style={styles.alwaysBuyTitle}>Sempre tenho em casa</Text>
-                    <Text style={styles.alwaysBuySubtitle}>Aparece pré-selecionado na despensa</Text>
+                    <Text style={styles.alwaysBuyTitle}>{t("add_custom_ingredient_modal.always_buy_title")}</Text>
+                    <Text style={styles.alwaysBuySubtitle}>{t("add_custom_ingredient_modal.always_buy_subtitle")}</Text>
                     </View>
                 </View>
                 <Switch
@@ -153,7 +155,7 @@ export function AddCustomIngredientModal({
                 onPress={handleConfirm}
                 style={styles.confirmBtn}
                 >
-                <Text style={styles.confirmBtnText}>Adicionar à despensa</Text>
+                <Text style={styles.confirmBtnText}>{t("add_custom_ingredient_modal.confirm_btn")}</Text>
                 </Pressable>
             </ScrollView>
             </View>

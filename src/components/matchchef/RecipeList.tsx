@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet } from "react-native";
 import type { MatchedRecipe } from "../../hooks/useMatchChef";
 import { RecipeCard } from "./RecipeCard";
+import { useLanguage } from "../../i18n/LanguageContext";
 
 interface RecipeListProps {
   perfectMatches: MatchedRecipe[];
@@ -17,11 +18,13 @@ export function RecipeList({
   onAddToShoppingList,
   hasSelection,
 }: RecipeListProps) {
+  const { language, t } = useLanguage();
+
   if (!hasSelection) {
     return (
       <View style={styles.empty}>
         <Text style={styles.emptyEmoji}>👆</Text>
-        <Text style={styles.emptyText}>Selecione ingredientes acima para ver receitas!</Text>
+        <Text style={styles.emptyText}>{t("recipe_list.empty")}</Text>
       </View>
     );
   }
@@ -30,7 +33,7 @@ export function RecipeList({
     return (
       <View style={styles.empty}>
         <Text style={styles.emptyEmoji}>🤔</Text>
-        <Text style={styles.emptyText}>Nenhuma receita encontrada. Tente selecionar mais ingredientes!</Text>
+        <Text style={styles.emptyText}>{t("recipe_list.not_found")}</Text>
       </View>
     );
   }
@@ -39,7 +42,9 @@ export function RecipeList({
     <View style={styles.container}>
       {perfectMatches.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>✅ Possíveis agora ({perfectMatches.length})</Text>
+          <Text style={styles.sectionTitle}>
+            ✅ {t("recipe_list.perfect_matches")} ({perfectMatches.length})
+          </Text>
           <View style={styles.list}>
             {perfectMatches.map((r, i) => (
               <RecipeCard
@@ -56,8 +61,10 @@ export function RecipeList({
 
       {almostMatches.length > 0 && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>🔥 Quase lá ({almostMatches.length})</Text>
-          <View style={styles.list}>
+          <Text style={styles.sectionTitle}>
+            🔥 {t("recipe_list.almost_matches")} ({almostMatches.length})
+          </Text> 
+         <View style={styles.list}>
             {almostMatches.map((r, i) => (
               <RecipeCard
                 key={r.id}
