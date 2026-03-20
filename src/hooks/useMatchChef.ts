@@ -42,12 +42,12 @@ export function useMatchChef() {
   }, []);
 
   const chefLevel = useMemo(() => {
-    if (completedRecipes >= 20) return { level: 5, title: "Chef Master 👨‍🍳", progress: 100 };
-    if (completedRecipes >= 15) return { level: 4, title: "Sous Chef 🔥", progress: ((completedRecipes - 15) / 5) * 100 };
-    if (completedRecipes >= 10) return { level: 3, title: "Cozinheiro(a) 🍳", progress: ((completedRecipes - 10) / 5) * 100 };
-    if (completedRecipes >= 5)  return { level: 2, title: "Aprendiz 📖",      progress: ((completedRecipes - 5) / 5) * 100 };
-    return { level: 1, title: "Iniciante 🌱", progress: (completedRecipes / 5) * 100 };
-  }, [completedRecipes]);
+    if (completedRecipes >= 20) return { level: 5, titleKey: "chef.master",    progress: 100 };
+    if (completedRecipes >= 15) return { level: 4, titleKey: "chef.sous",      progress: ((completedRecipes - 15) / 5) * 100 };
+    if (completedRecipes >= 10) return { level: 3, titleKey: "chef.cook",      progress: ((completedRecipes - 10) / 5) * 100 };
+    if (completedRecipes >= 5)  return { level: 2, titleKey: "chef.apprentice",progress: ((completedRecipes - 5) / 5) * 100 };
+    return { level: 1, titleKey: "chef.beginner", progress: (completedRecipes / 5) * 100 };
+    }, [completedRecipes]);    
 
   const matchedRecipes = useMemo((): MatchedRecipe[] => {
     if (selectedIngredients.size === 0) return [];
