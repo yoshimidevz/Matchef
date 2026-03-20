@@ -3,7 +3,7 @@ import {
   View, Text, Pressable, TextInput, ScrollView,
   Modal, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Platform,
 } from "react-native";
-import { X, Camera } from "lucide-react-native";
+import { X, Camera, Star } from "lucide-react-native";
 import { useLanguage } from "../../i18n/LanguageContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -14,12 +14,19 @@ const MOCK_RECIPES = [
   { id: "52774", title: "Pad See Ew" },
 ];
 
+const DIFFICULTY_OPTIONS: { value: "easy" | "medium" | "hard"; label: string; emoji: string; color: string }[] = [
+  { value: "easy",   label: "Fácil",   emoji: "😊", color: "#22c55e" },
+  { value: "medium", label: "Médio",   emoji: "😅", color: "#facc15" },
+  { value: "hard",   label: "Difícil", emoji: "🔥", color: "#ef4444" },
+];
+
 interface CreatePostSheetProps {
   open: boolean;
   onClose: () => void;
   onPublish: (post: {
     caption: string;
-    status: "success" | "fail";
+    rating?: 1 | 2 | 3 | 4 | 5;
+    difficulty?: "easy" | "medium" | "hard";
     recipeId: string;
     recipeTitle: string;
   }) => void;
@@ -27,16 +34,24 @@ interface CreatePostSheetProps {
 
 export function CreatePostSheet({ open, onClose, onPublish }: CreatePostSheetProps) {
   const [caption, setCaption] = useState("");
-  const [status, setStatus] = useState<"success" | "fail">("success");
+  const [rating, setRating] = useState<1 | 2 | 3 | 4 | 5 | null>(null);
+  const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard" | null>(null);
   const [recipeIndex, setRecipeIndex] = useState(0);
   const { t } = useLanguage();
   const insets = useSafeAreaInsets();
 
   const handlePublish = () => {
     const recipe = MOCK_RECIPES[recipeIndex];
-    onPublish({ caption, status, recipeId: recipe.id, recipeTitle: recipe.title });
+    onPublish({
+      caption,
+      rating: rating ?? undefined,
+      difficulty: difficulty ?? undefined,
+      recipeId: recipe.id,
+      recipeTitle: recipe.title,
+    });
     setCaption("");
-    setStatus("success");
+    setRating(null);
+    setDifficulty(null);
     setRecipeIndex(0);
   };
 
@@ -51,7 +66,6 @@ export function CreatePostSheet({ open, onClose, onPublish }: CreatePostSheetPro
         <View style={[styles.sheet, { paddingBottom: insets.bottom || 16 }]}>
           <View style={styles.handle} />
 
-          {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>{t("create.title")}</Text>
             <Pressable onPress={onClose} style={styles.closeBtn}>
@@ -82,29 +96,64 @@ export function CreatePostSheet({ open, onClose, onPublish }: CreatePostSheetPro
               ))}
             </ScrollView>
 
-            {/* Status */}
-            <Text style={styles.label}>{t("create.how_was_it")}</Text>
-            <View style={styles.statusRow}>
-              <Pressable
-                onPress={() => setStatus("success")}
-                style={[styles.statusBtn, status === "success" && styles.statusBtnSuccess]}
-              >
-                <Text style={[styles.statusBtnText, status === "success" && styles.statusBtnTextSuccess]}>
-                  {t("community.success")}
-                </Text>
-              </Pressable>
-              <Pressable
-                onPress={() => setStatus("fail")}
-                style={[styles.statusBtn, status === "fail" && styles.statusBtnFail]}
-              >
-                <Text style={[styles.statusBtnText, status === "fail" && styles.statusBtnTextFail]}>
-                  {t("community.fail")}
-                </Text>
-              </Pressable>
+            {/* Nota (estrelas) — opcional */}
+            <View style={styles.optionalHeader}>
+              <Text style={styles.label}>{t("create.rating_label")}</Text>
+              <Text style={styles.optionalTag}>{t("create.optional")}</Text>
+            </View>
+            <View style={styles.starsRow}>
+              {([1, 2, 3, 4, 5] as const).map((star) => (
+                <Pressable
+                  key={star}
+                  onPress={() => setRating(rating === star ? null : star)}
+                  style={styles.starBtn}
+                >
+                  <Star
+                    size={32}
+                    color="#facc15"
+                    fill={rating !== null && star <= rating ? "#facc15" : "transparent"}
+                  />
+                </Pressable>
+              ))}
+            </View>
+            {rating && (
+              <Text style={styles.ratingHint}>
+                {rating === 1 && "😬 Não ficou bom..."}
+                {rating === 2 && "😕 Deixou a desejar"}
+                {rating === 3 && "😊 Ok, no geral"}
+                {rating === 4 && "😋 Ficou muito bom!"}
+                {rating === 5 && "🤩 Perfeito, faria de novo!"}
+              </Text>
+            )}
+
+            {/* Dificuldade — opcional */}
+            <View style={[styles.optionalHeader, { marginTop: 16 }]}>
+              <Text style={styles.label}>{t("create.difficulty_label")}</Text>
+              <Text style={styles.optionalTag}>{t("create.optional")}</Text>
+            </View>
+            <View style={styles.difficultyRow}>
+              {DIFFICULTY_OPTIONS.map((opt) => {
+                const active = difficulty === opt.value;
+                return (
+                  <Pressable
+                    key={opt.value}
+                    onPress={() => setDifficulty(active ? null : opt.value)}
+                    style={[
+                      styles.difficultyBtn,
+                      active && { borderColor: opt.color, backgroundColor: `${opt.color}18` },
+                    ]}
+                  >
+                    <Text style={styles.difficultyEmoji}>{opt.emoji}</Text>
+                    <Text style={[styles.difficultyText, active && { color: opt.color }]}>
+                      {opt.label}
+                    </Text>
+                  </Pressable>
+                );
+              })}
             </View>
 
             {/* Caption */}
-            <Text style={styles.label}>{t("create.description")}</Text>
+            <Text style={[styles.label, { marginTop: 16 }]}>{t("create.description")}</Text>
             <TextInput
               value={caption}
               onChangeText={setCaption}
@@ -138,7 +187,8 @@ const styles = StyleSheet.create({
   sheet: {
     backgroundColor: "#1a1a1a",
     borderTopLeftRadius: 24, borderTopRightRadius: 24,
-    maxHeight: "85%", paddingHorizontal: 16, paddingTop: 8,
+    height: "100  %", 
+    paddingHorizontal: 16, paddingTop: 8,
   },
   handle: {
     width: 36, height: 4, borderRadius: 2,
@@ -153,7 +203,7 @@ const styles = StyleSheet.create({
     width: 32, height: 32, borderRadius: 16,
     backgroundColor: "#2a2a2a", alignItems: "center", justifyContent: "center",
   },
-  scroll: { maxHeight: 600 },
+  scroll: {},
   photoPlaceholder: {
     borderWidth: 2, borderStyle: "dashed", borderColor: "#333",
     borderRadius: 16, alignItems: "center", justifyContent: "center",
@@ -161,6 +211,14 @@ const styles = StyleSheet.create({
   },
   photoText: { fontSize: 13, color: "#555" },
   label: { fontSize: 13, fontWeight: "700", color: "#fff", marginBottom: 8 },
+  optionalHeader: {
+    flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 8,
+  },
+  optionalTag: {
+    fontSize: 11, color: "#555", fontWeight: "500",
+    backgroundColor: "#2a2a2a", paddingHorizontal: 8,
+    paddingVertical: 2, borderRadius: 99,
+  },
   recipeScroll: { marginBottom: 20 },
   recipeChip: {
     paddingHorizontal: 14, paddingVertical: 8, borderRadius: 99,
@@ -169,16 +227,25 @@ const styles = StyleSheet.create({
   recipeChipActive: { backgroundColor: "hsl(25,90%,55%)" },
   recipeChipText: { fontSize: 12, fontWeight: "600", color: "#666" },
   recipeChipTextActive: { color: "#fff" },
-  statusRow: { flexDirection: "row", gap: 10, marginBottom: 20 },
-  statusBtn: {
-    flex: 1, paddingVertical: 12, borderRadius: 12,
-    backgroundColor: "#2a2a2a", alignItems: "center",
+
+  starsRow: {
+    flexDirection: "row", gap: 8, marginBottom: 8,
   },
-  statusBtnSuccess: { backgroundColor: "rgba(34,197,94,0.15)" },
-  statusBtnFail: { backgroundColor: "rgba(239,68,68,0.15)" },
-  statusBtnText: { fontSize: 13, fontWeight: "700", color: "#666" },
-  statusBtnTextSuccess: { color: "#22c55e" },
-  statusBtnTextFail: { color: "#ef4444" },
+  starBtn: { padding: 4 },
+  ratingHint: {
+    fontSize: 12, color: "#888", marginBottom: 4,
+  },
+
+  difficultyRow: { flexDirection: "row", gap: 8, marginBottom: 4 },
+  difficultyBtn: {
+    flex: 1, alignItems: "center", paddingVertical: 12,
+    borderRadius: 14, borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "#2a2a2a", gap: 4,
+  },
+  difficultyEmoji: { fontSize: 20 },
+  difficultyText: { fontSize: 12, fontWeight: "700", color: "#666" },
+
   textarea: {
     backgroundColor: "#2a2a2a", borderRadius: 12,
     paddingHorizontal: 14, paddingVertical: 10,

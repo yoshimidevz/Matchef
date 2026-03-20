@@ -119,6 +119,9 @@ export const translations = {
   "recipes.no_results_hint":   { pt: "Tente outro nome ou verifique a ortografia", en: "Try another name or check the spelling" },
   "recipes.initial_text":      { pt: "Digite o nome de uma receita para começar", en: "Type a recipe name to get started" },
   "recipes.ingredients_count": { pt: "ingredientes", en: "ingredients" },
+  "create.rating_label":     { pt: "Como ficou a receita?", en: "How was the recipe?" },
+  "create.difficulty_label": { pt: "Qual foi a dificuldade?", en: "How difficult was it?" },
+  "create.optional":         { pt: "opcional", en: "optional" },
 } as const;
 
 export type TranslationKey = keyof typeof translations
