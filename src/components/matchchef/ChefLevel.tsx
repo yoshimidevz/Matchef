@@ -4,12 +4,12 @@ import { useLanguage } from "../../i18n/LanguageContext";
 
 interface ChefLevelProps {
   level: number;
-  title: string;
+  titleKey: string;
   progress: number;
   completedRecipes: number;
 }
 
-export function ChefLevel({ level, title, progress, completedRecipes }: ChefLevelProps) {
+export function ChefLevel({ level, titleKey, progress, completedRecipes }: ChefLevelProps) {
   const { t } = useLanguage();
 
   return (
@@ -20,7 +20,7 @@ export function ChefLevel({ level, title, progress, completedRecipes }: ChefLeve
         </View>
         <View style={styles.info}>
           <Text style={styles.levelLabel}>{t("chef.level")} {level}</Text>
-          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.title}>{t(titleKey as any)}</Text>
         </View>
         <Text style={styles.count}>{completedRecipes} {t("despensa.recipes")}</Text>
       </View>
