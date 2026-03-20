@@ -81,7 +81,8 @@ export default function Comunidade() {
 
   const handlePublish = useCallback((data: {
     caption: string;
-    status: "success" | "fail";
+    rating?: 1 | 2 | 3 | 4 | 5;
+    difficulty?: "easy" | "medium" | "hard";
     recipeId: string;
     recipeTitle: string;
   }) => {
@@ -89,7 +90,8 @@ export default function Comunidade() {
       id: `p-${Date.now()}`,
       user: { name: "Você", avatar: "" },
       createdAt: "agora",
-      status: data.status,
+      rating: data.rating,
+      difficulty: data.difficulty,
       linkedRecipe: {
         id: data.recipeId,
         title: data.recipeTitle,
