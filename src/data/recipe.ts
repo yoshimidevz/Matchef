@@ -191,7 +191,7 @@ export const recipes: Recipe[] = [
 ];
 
 export const vibes = [
-  { id: "rapido",    label: "⚡ Em 15 min" },
-  { id: "lanche",   label: "🌙 Lanche da Noite" },
-  { id: "uma-panela", label: "🍲 Uma panela só" },
+  { id: "rapido",    label: "⚡ Em 15 min", labelEn: "⚡ Under 15 min" },
+  { id: "lanche",   label: "🌙 Lanche da Noite", labelEn: "🌙 Night Snack" },
+  { id: "uma-panela", label: "🍲 Uma panela só", labelEn: "🍲 One Pot Only" },
 ];
