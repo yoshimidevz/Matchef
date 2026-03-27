@@ -1,10 +1,11 @@
 import { useState } from "react";
 import {
   View, Text, Pressable, TextInput,
-  Modal, StyleSheet, TouchableOpacity,
+  Modal, StyleSheet, TouchableOpacity, ActivityIndicator,
 } from "react-native";
 import { X, ChefHat } from "lucide-react-native";
 import { useLanguage } from "../../i18n/LanguageContext";
+import { createUser, getUserByEmail } from "../../services/api"; // ajusta o caminho
 
 interface AuthModalProps {
   open: boolean;
@@ -15,12 +16,34 @@ interface AuthModalProps {
 export function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const { t } = useLanguage();
 
-  const handleSubmit = () => {
-    onLogin();
-    setEmail("");
-    setPassword("");
+  const handleSubmit = async () => {
+    if (!email) {
+      setError("Digite um email.");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const existing = await getUserByEmail(email);
+
+      if (existing.error) {
+        await createUser(email.split("@")[0], email);
+      }
+
+      onLogin();
+      setEmail("");
+      setPassword("");
+    } catch (err) {
+      setError("Erro ao conectar com o servidor.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -58,8 +81,16 @@ export function AuthModal({ open, onClose, onLogin }: AuthModalProps) {
               secureTextEntry
               style={styles.input}
             />
-            <Pressable onPress={handleSubmit} style={styles.loginBtn}>
-              <Text style={styles.loginBtnText}>{t("auth.login")}</Text>
+
+            {error ? (
+              <Text style={styles.errorText}>{error}</Text>
+            ) : null}
+
+            <Pressable onPress={handleSubmit} style={styles.loginBtn} disabled={loading}>
+              {loading
+                ? <ActivityIndicator color="#fff" />
+                : <Text style={styles.loginBtnText}>{t("auth.login")}</Text>
+              }
             </Pressable>
           </View>
         </View>
@@ -104,4 +135,5 @@ const styles = StyleSheet.create({
     height: 48, alignItems: "center", justifyContent: "center",
   },
   loginBtnText: { fontSize: 15, fontWeight: "800", color: "#fff" },
+  errorText: { fontSize: 13, color: "#ff6b6b", textAlign: "center" },
 });
