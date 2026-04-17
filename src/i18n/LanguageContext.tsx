@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, type ReactNode } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { toDisplayIngredient, translateIngredientsBatch } from "../services/translationService";
+import { LanguageSplash } from "../components/LanguageSplash";
 
 export type Language = "pt" | "en";
 
@@ -21,7 +22,8 @@ export const translations = {
   "nav.search":                   { pt: "Buscar", en: "Search" },
   "nav.community":                { pt: "Comunidade", en: "Community" },
   "nav.profile":                  { pt: "Perfil", en: "Profile" },
-  "nav.pantry": { pt: "Despensa", en: "Pantry" },
+  "nav.pantry":                   { pt: "Despensa", en: "Pantry" },
+  "nav.recipes":                  { pt: "Receitas", en: "Recipes" },
   "zerowaste.label":              { pt: "Zero Desperdício", en: "Zero Waste" },
   "zerowaste.magic_title":        { pt: "✨ Magia Zero Waste", en: "✨ Zero Waste Magic" },
   "zerowaste.description_prefix": { pt: "Use os", en: "Use the" },
@@ -42,107 +44,106 @@ export const translations = {
   "substitution.missing_prefix":  { pt: "Sem", en: "No" },
   "substitution.swap":            { pt: "Tente:", en: "Try:" },
   "chef.level":                   { pt: "Nível", en: "Level" },
-  "despensa.recipes": { pt: "receitas", en: "recipes" },
-  "cooking.step":     { pt: "Passo", en: "Step" },
-  "cooking.of":       { pt: "de", en: "of" },
-  "kitchen.back":     { pt: "Voltar", en: "Back" },
-  "kitchen.next":     { pt: "Próximo", en: "Next" },
-  "kitchen.finish":   { pt: "Finalizar", en: "Finish" },
-  "community.title":        { pt: "Compartilhe suas receitas", en: "Share your recipes" },
-  "community.success":      { pt: "Receita publicada com sucesso!", en: "Recipe published successfully!" },
-  "community.fail":         { pt: "Falha ao publicar receita. Tente novamente.", en: "Failed to publish recipe. Please try again." },
-  "community.recipe_used":  { pt: "Essa receita já foi usada recentemente. Tente outra!", en: "This recipe has already been used recently. Try another one!" },
-  "community.photo_alt":    { pt: "Foto da receita", en: "Recipe photo" },
-  "comments.title":        { pt: "Comentários", en: "Comments" },
-  "comments.empty":        { pt: "Seja o primeiro a comentar!", en: "Be the first to comment!" },
-  "comments.placeholder":  { pt: "Escreva seu comentário...", en: "Write your comment..." },
-  "create.title":         { pt: "Criar nova receita", en: "Create new recipe" },
-  "create.photo_placeholder": { pt: "Tire uma foto ou escolha da galeria", en: "Take a photo or choose from gallery" },
-  "create.link_recipe":    { pt: "Link da receita (opcional)", en: "Recipe link (optional)" },
-  "create.how_was_it":     { pt: "Como foi sua experiência?", en: "How was your experience?" },
-  "create.description":    { pt: "Descrição", en: "Description" },
+  "chef.master":                  { pt: "Chef Master 👨‍🍳", en: "Master Chef 👨‍🍳" },
+  "chef.sous":                    { pt: "Sous Chef 🔥", en: "Sous Chef 🔥" },
+  "chef.cook":                    { pt: "Cozinheiro(a) 🍳", en: "Cook 🍳" },
+  "chef.apprentice":              { pt: "Aprendiz 📖", en: "Apprentice 📖" },
+  "chef.beginner":                { pt: "Iniciante 🌱", en: "Beginner 🌱" },
+  "despensa.recipes":             { pt: "receitas", en: "recipes" },
+  "cooking.step":                 { pt: "Passo", en: "Step" },
+  "cooking.of":                   { pt: "de", en: "of" },
+  "kitchen.back":                 { pt: "Voltar", en: "Back" },
+  "kitchen.next":                 { pt: "Próximo", en: "Next" },
+  "kitchen.finish":               { pt: "Finalizar", en: "Finish" },
+  "community.title":              { pt: "Compartilhe suas receitas", en: "Share your recipes" },
+  "community.success":            { pt: "Receita publicada com sucesso!", en: "Recipe published successfully!" },
+  "community.fail":               { pt: "Falha ao publicar receita. Tente novamente.", en: "Failed to publish recipe. Please try again." },
+  "community.recipe_used":        { pt: "Essa receita já foi usada recentemente. Tente outra!", en: "This recipe has already been used recently. Try another one!" },
+  "community.photo_alt":          { pt: "Foto da receita", en: "Recipe photo" },
+  "comments.title":               { pt: "Comentários", en: "Comments" },
+  "comments.empty":               { pt: "Seja o primeiro a comentar!", en: "Be the first to comment!" },
+  "comments.placeholder":         { pt: "Escreva seu comentário...", en: "Write your comment..." },
+  "create.title":                 { pt: "Criar nova receita", en: "Create new recipe" },
+  "create.photo_placeholder":     { pt: "Tire uma foto ou escolha da galeria", en: "Take a photo or choose from gallery" },
+  "create.link_recipe":           { pt: "Link da receita (opcional)", en: "Recipe link (optional)" },
+  "create.how_was_it":            { pt: "Como foi sua experiência?", en: "How was your experience?" },
+  "create.description":           { pt: "Descrição", en: "Description" },
   "create.description_placeholder": { pt: "Escreva uma descrição para sua receita...", en: "Write a description for your recipe..." },
-  "create.publish":       { pt: "Publicar", en: "Publish" },
-  "create.published_title": { pt: "Receita publicada!", en: "Recipe published!" },
-  "create.published_desc": { pt: "Obrigado por compartilhar sua receita com a comunidade MatchChef!", en: "Thank you for sharing your recipe with the MatchChef community!" },
-  "auth.title":          { pt: "Bem-vindo ao MatchChef", en: "Welcome to MatchChef" },
-  "auth.subtitle":       { pt: "Faça login para começar a cozinhar com o que você tem!", en: "Log in to start cooking with what you have!" },
-  "auth.email":          { pt: "Email", en: "Email" },
-  "auth.password":       { pt: "Senha", en: "Password" },
-  "auth.login":          { pt: "Entrar", en: "Log In" },
-  "profile.posts":       { pt: "Publicações", en: "Posts" },
-  "profile.followers":   { pt: "Seguidores", en: "Followers" },
-  "profile.following":   { pt: "Seguindo", en: "Following" },
-  "profile.edit":        { pt: "Editar perfil", en: "Edit profile" },
-  "profile.my_posts":    { pt: "Minhas publicações", en: "My posts" },
-  "profile.saved":       { pt: "Receitas salvas", en: "Saved recipes" },
-  "profile.saved_label": { pt: "Salvas", en: "Saved" },
-  "profile.no_posts":    { pt: "Nenhuma publicação ainda.", en: "No posts yet." },
-  "profile.no_saved":    { pt: "Nenhuma receita salva ainda.", en: "No saved recipes yet." },
-  "profile.cover_alt":   { pt: "Foto de capa do perfil", en: "Profile cover photo" },
-  "settings.title":          { pt: "Configurações", en: "Settings" },
-  "settings.account":        { pt: "Conta", en: "Account" },
-  "settings.personal_data":  { pt: "Dados pessoais", en: "Personal data" },
-  "settings.change_password": { pt: "Alterar senha", en: "Change password" },
-  "settings.preferences":    { pt: "Preferências", en: "Preferences" },
-  "settings.language":       { pt: "Idioma", en: "Language" },
-  "settings.dark_mode":      { pt: "Modo escuro", en: "Dark mode" },
-  "settings.dietary":        { pt: "Restrições alimentares", en: "Dietary restrictions" },
-  "settings.vegetarian":     { pt: "Vegetariano", en: "Vegetarian" },
-  "settings.lactose_free":   { pt: "Sem lactose", en: "Lactose-free" },
-  "settings.notifications":   { pt: "Notificações", en: "Notifications" },
-  "settings.likes_notif":     { pt: "Curtidas", en: "Likes" },
-  "settings.new_followers":  { pt: "Novos seguidores", en: "New followers" },
-  "settings.logout":         { pt: "Sair da conta", en: "Log out" },
-  "settings.logout_title":   { pt: "Confirmação de logout", en: "Logout confirmation" },
-  "settings.logout_desc":    { pt: "Tem certeza de que deseja sair da sua conta?", en: "Are you sure you want to log out of your account?" },
-  "results.title":          { pt: "Resultados da busca", en: "Search results" },
-  "results.ingredient":     { pt: "ingrediente", en: "ingredient" },
-  "results.ingredients":    { pt: "ingredientes", en: "ingredients" },
-  "results.selected":       { pt: "Selecionado", en: "Selected" },
-  "results.selected_plural": { pt: "Selecionados", en: "Selected" },
-  "results.urgent_count":   { pt: "{count} urgente", en: "{count} urgent" },
-  "results.urgent_count_plural": { pt: "{count} urgentes", en: "{count} urgent" },
-  "results.analyzing":      { pt: "Analisando ingredientes...", en: "Analyzing ingredients..." },
-  "results.you_have":       { pt: "Você tem", en: "You have" },
-  "results.of":            { pt: "de", en: "of" },
-  "results.missing":       { pt: "faltando", en: "missing" },
-  "results.save_your":     { pt: "Salve suas receitas favoritas para acessá-las facilmente depois!", en: "Save your favorite recipes to access them easily later!" },
-  "results.no_results":    { pt: "Nenhuma receita encontrada. Tente adicionar mais ingredientes ou verificar a ortografia.", en: "No recipes found. Try adding more ingredients or checking the spelling." },
-  "results.go_back":       { pt: "Voltar para a busca", en: "Go back to search" },
-  "nav.recipes":               { pt: "Receitas",    en: "Recipes" },
-  "recipes.title":             { pt: "Buscar receitas", en: "Search recipes" },
-  "recipes.subtitle":          { pt: "Encontre receitas pelo nome", en: "Find recipes by name" },
-  "recipes.placeholder":       { pt: "Ex: frango, sushi, risoto...", en: "E.g.: chicken, sushi, risotto..." },
-  "recipes.search_btn":        { pt: "Buscar", en: "Search" },
-  "recipes.no_results":        { pt: "Nenhuma receita encontrada", en: "No recipes found" },
-  "recipes.no_results_hint":   { pt: "Tente outro nome ou verifique a ortografia", en: "Try another name or check the spelling" },
-  "recipes.initial_text":      { pt: "Digite o nome de uma receita para começar", en: "Type a recipe name to get started" },
-  "recipes.ingredients_count": { pt: "ingredientes", en: "ingredients" },
-  "create.rating_label":     { pt: "Como ficou a receita?", en: "How was the recipe?" },
-  "create.difficulty_label": { pt: "Qual foi a dificuldade?", en: "How difficult was it?" },
-  "create.optional":         { pt: "opcional", en: "optional" },
-  "pantry.title":          { pt: "O que eu tenho na geladeira?", en: "What's in my fridge?" },
-  "pantry.subtitle":       { pt: "Toque nos ingredientes ou digite para buscar", en: "Tap ingredients or type to search" },
-  "pantry.selected":       { pt: "ingrediente selecionado", en: "ingredient selected" },
-  "pantry.selected_plural":{ pt: "ingredientes selecionados", en: "ingredients selected" },
-  "vibe_filters.title":     { pt: "Filtro de Vibe", en: "Vibe Filter" },
-  "recipe_list.empty":      { pt: "Selecione ingredientes acima para ver receitas!", en: "Select ingredients above to see recipes!" },
-  "recipe_list.not_found":  { pt: "Nenhuma receita encontrada. Tente selecionar mais ingredientes!", en: "No recipes found. Try selecting more ingredients!" },
-  "recipe_list.perfect_matches": { pt: "✅ Possíveis agora ({count})", en: "✅ Possible now ({count})" },
-  "recipe_list.almost_matches": { pt: "🔥 Quase lá ({count})", en: "🔥 Almost there ({count})" },
-  "add_custom_ingredient_modal.category_label": { pt: "Em qual categoria ele fica?", en: "In which category does it belong?" },
-  "add_custom_ingredient_modal.always_buy_title": { pt: "Sempre tenho em casa", en: "I always have at home" },
+  "create.publish":               { pt: "Publicar", en: "Publish" },
+  "create.published_title":       { pt: "Receita publicada!", en: "Recipe published!" },
+  "create.published_desc":        { pt: "Obrigado por compartilhar sua receita com a comunidade MatchChef!", en: "Thank you for sharing your recipe with the MatchChef community!" },
+  "create.rating_label":          { pt: "Como ficou a receita?", en: "How was the recipe?" },
+  "create.difficulty_label":      { pt: "Qual foi a dificuldade?", en: "How difficult was it?" },
+  "create.optional":              { pt: "opcional", en: "optional" },
+  "auth.title":                   { pt: "Bem-vindo ao MatchChef", en: "Welcome to MatchChef" },
+  "auth.subtitle":                { pt: "Faça login para começar a cozinhar com o que você tem!", en: "Log in to start cooking with what you have!" },
+  "auth.email":                   { pt: "Email", en: "Email" },
+  "auth.password":                { pt: "Senha", en: "Password" },
+  "auth.login":                   { pt: "Entrar", en: "Log In" },
+  "profile.posts":                { pt: "Publicações", en: "Posts" },
+  "profile.followers":            { pt: "Seguidores", en: "Followers" },
+  "profile.following":            { pt: "Seguindo", en: "Following" },
+  "profile.edit":                 { pt: "Editar perfil", en: "Edit profile" },
+  "profile.my_posts":             { pt: "Minhas publicações", en: "My posts" },
+  "profile.saved":                { pt: "Receitas salvas", en: "Saved recipes" },
+  "profile.saved_label":          { pt: "Salvas", en: "Saved" },
+  "profile.no_posts":             { pt: "Nenhuma publicação ainda.", en: "No posts yet." },
+  "profile.no_saved":             { pt: "Nenhuma receita salva ainda.", en: "No saved recipes yet." },
+  "profile.cover_alt":            { pt: "Foto de capa do perfil", en: "Profile cover photo" },
+  "settings.title":               { pt: "Configurações", en: "Settings" },
+  "settings.account":             { pt: "Conta", en: "Account" },
+  "settings.personal_data":       { pt: "Dados pessoais", en: "Personal data" },
+  "settings.change_password":     { pt: "Alterar senha", en: "Change password" },
+  "settings.preferences":         { pt: "Preferências", en: "Preferences" },
+  "settings.language":            { pt: "Idioma", en: "Language" },
+  "settings.dark_mode":           { pt: "Modo escuro", en: "Dark mode" },
+  "settings.dietary":             { pt: "Restrições alimentares", en: "Dietary restrictions" },
+  "settings.vegetarian":          { pt: "Vegetariano", en: "Vegetarian" },
+  "settings.lactose_free":        { pt: "Sem lactose", en: "Lactose-free" },
+  "settings.notifications":       { pt: "Notificações", en: "Notifications" },
+  "settings.likes_notif":         { pt: "Curtidas", en: "Likes" },
+  "settings.new_followers":       { pt: "Novos seguidores", en: "New followers" },
+  "settings.logout":              { pt: "Sair da conta", en: "Log out" },
+  "settings.logout_title":        { pt: "Confirmação de logout", en: "Logout confirmation" },
+  "settings.logout_desc":         { pt: "Tem certeza de que deseja sair da sua conta?", en: "Are you sure you want to log out of your account?" },
+  "results.title":                { pt: "Resultados da busca", en: "Search results" },
+  "results.ingredient":           { pt: "ingrediente", en: "ingredient" },
+  "results.ingredients":          { pt: "ingredientes", en: "ingredients" },
+  "results.selected":             { pt: "Selecionado", en: "Selected" },
+  "results.selected_plural":      { pt: "Selecionados", en: "Selected" },
+  "results.urgent_count":         { pt: "{count} urgente", en: "{count} urgent" },
+  "results.urgent_count_plural":  { pt: "{count} urgentes", en: "{count} urgent" },
+  "results.analyzing":            { pt: "Analisando ingredientes...", en: "Analyzing ingredients..." },
+  "results.you_have":             { pt: "Você tem", en: "You have" },
+  "results.of":                   { pt: "de", en: "of" },
+  "results.missing":              { pt: "faltando", en: "missing" },
+  "results.save_your":            { pt: "Salve suas receitas favoritas para acessá-las facilmente depois!", en: "Save your favorite recipes to access them easily later!" },
+  "results.no_results":           { pt: "Nenhuma receita encontrada. Tente adicionar mais ingredientes ou verificar a ortografia.", en: "No recipes found. Try adding more ingredients or checking the spelling." },
+  "results.go_back":              { pt: "Voltar para a busca", en: "Go back to search" },
+  "recipes.title":                { pt: "Buscar receitas", en: "Search recipes" },
+  "recipes.subtitle":             { pt: "Encontre receitas pelo nome", en: "Find recipes by name" },
+  "recipes.placeholder":          { pt: "Ex: frango, sushi, risoto...", en: "E.g.: chicken, sushi, risotto..." },
+  "recipes.search_btn":           { pt: "Buscar", en: "Search" },
+  "recipes.no_results":           { pt: "Nenhuma receita encontrada", en: "No recipes found" },
+  "recipes.no_results_hint":      { pt: "Tente outro nome ou verifique a ortografia", en: "Try another name or check the spelling" },
+  "recipes.initial_text":         { pt: "Digite o nome de uma receita para começar", en: "Type a recipe name to get started" },
+  "recipes.ingredients_count":    { pt: "ingredientes", en: "ingredients" },
+  "pantry.title":                 { pt: "O que eu tenho na geladeira?", en: "What's in my fridge?" },
+  "pantry.subtitle":              { pt: "Toque nos ingredientes ou digite para buscar", en: "Tap ingredients or type to search" },
+  "pantry.selected":              { pt: "ingrediente selecionado", en: "ingredient selected" },
+  "pantry.selected_plural":       { pt: "ingredientes selecionados", en: "ingredients selected" },
+  "vibe_filters.title":           { pt: "Filtro de Vibe", en: "Vibe Filter" },
+  "recipe_list.empty":            { pt: "Selecione ingredientes acima para ver receitas!", en: "Select ingredients above to see recipes!" },
+  "recipe_list.not_found":        { pt: "Nenhuma receita encontrada. Tente selecionar mais ingredientes!", en: "No recipes found. Try selecting more ingredients!" },
+  "recipe_list.perfect_matches":  { pt: "✅ Possíveis agora", en: "✅ Possible now" },
+  "recipe_list.almost_matches":   { pt: "🔥 Quase lá", en: "🔥 Almost there" },
+  "add_custom_ingredient_modal.category_label":    { pt: "Em qual categoria ele fica?", en: "In which category does it belong?" },
+  "add_custom_ingredient_modal.always_buy_title":  { pt: "Sempre tenho em casa", en: "I always have at home" },
   "add_custom_ingredient_modal.always_buy_subtitle": { pt: "Aparece pré-selecionado na despensa", en: "Appears pre-selected in the pantry" },
-  "add_custom_ingredient_modal.confirm_btn": { pt: "Adicionar à despensa", en: "Add to Pantry" },
-  "chef.master":     { pt: "Chef Master 👨‍🍳", en: "Master Chef 👨‍🍳" },
-  "chef.sous":       { pt: "Sous Chef 🔥",     en: "Sous Chef 🔥"     },
-  "chef.cook":       { pt: "Cozinheiro(a) 🍳", en: "Cook 🍳"          },
-  "chef.apprentice": { pt: "Aprendiz 📖",      en: "Apprentice 📖"    },
-  "chef.beginner":   { pt: "Iniciante 🌱",     en: "Beginner 🌱"      },
+  "add_custom_ingredient_modal.confirm_btn":       { pt: "Adicionar à despensa", en: "Add to Pantry" },
 } as const;
 
-export type TranslationKey = keyof typeof translations
+export type TranslationKey = keyof typeof translations;
 
 interface LanguageContextType {
   language: Language;
@@ -154,6 +155,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
   const [language, setLanguageState] = useState<Language>("pt");
+  const [showSplash, setShowSplash] = useState(false);
 
   useEffect(() => {
     AsyncStorage.getItem("matchchef-lang").then((stored) => {
@@ -162,8 +164,13 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const setLanguage = useCallback((lang: Language) => {
-    setLanguageState(lang);
-    AsyncStorage.setItem("matchchef-lang", lang);
+    // Mostra splash, troca idioma depois de 800ms, esconde splash após 1.4s
+    setShowSplash(true);
+    setTimeout(() => {
+      setLanguageState(lang);
+      AsyncStorage.setItem("matchchef-lang", lang);
+    }, 800);
+    setTimeout(() => setShowSplash(false), 1400);
   }, []);
 
   const t = useCallback(
@@ -174,6 +181,7 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>
       {children}
+      <LanguageSplash visible={showSplash} />
     </LanguageContext.Provider>
   );
 }
@@ -184,7 +192,7 @@ export function useLanguage() {
   return ctx;
 }
 
-// ── Hooks de tradução de ingredientes ────────────────────────────────────────
+// ── Hooks de tradução de ingredientes ─────────────────────────────────────────
 export function useTranslatedIngredient(apiName: string): string {
   const { language } = useLanguage();
   const [translated, setTranslated] = useState(apiName);
@@ -200,11 +208,30 @@ export function useTranslatedIngredient(apiName: string): string {
 export function useTranslatedIngredients(apiNames: string[]): string[] {
   const { language } = useLanguage();
   const [translated, setTranslated] = useState<string[]>(apiNames);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (language === "en") { setTranslated(apiNames); return; }
-    translateIngredientsBatch(apiNames, "PT").then(setTranslated);
+    if (apiNames.length === 0) { setTranslated([]); return; }
+    setIsLoading(true);
+    translateIngredientsBatch(apiNames, "PT")
+      .then(setTranslated)
+      .finally(() => setIsLoading(false));
   }, [JSON.stringify(apiNames), language]);
 
   return translated;
+}
+
+// Hook auxiliar para saber se tradução ainda está carregando
+export function useIngredientsLoading(apiNames: string[]): boolean {
+  const { language } = useLanguage();
+  const [isLoading, setIsLoading] = useState(language === "pt" && apiNames.length > 0);
+
+  useEffect(() => {
+    if (language === "en" || apiNames.length === 0) { setIsLoading(false); return; }
+    setIsLoading(true);
+    translateIngredientsBatch(apiNames, "PT").finally(() => setIsLoading(false));
+  }, [JSON.stringify(apiNames), language]);
+
+  return isLoading;
 }
