@@ -1,4 +1,4 @@
-const BASE_URL = 'http://10.20.16.219:3001';
+const BASE_URL = 'https://api-matchef-production.up.railway.app';
 
 export const createUser = async (name: string, email: string) => {
   const response = await fetch(`${BASE_URL}/users`, {
