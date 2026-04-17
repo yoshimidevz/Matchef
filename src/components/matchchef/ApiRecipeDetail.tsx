@@ -5,7 +5,7 @@ import {
 } from "react-native";
 import { X, Globe, Tag, Youtube, RefreshCw, Recycle } from "lucide-react-native";
 import { getMealById, type MealDetail } from "../../services/mealApi";
-import { useLanguage, useTranslatedIngredients, type Language } from "../../i18n/LanguageContext";
+import { useLanguage, useTranslatedIngredients, useIngredientsLoading, type Language } from "../../i18n/LanguageContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const SUBSTITUTIONS: Record<string, { pt: string; en: string }> = {
@@ -61,8 +61,23 @@ function getZeroWasteDetail(meal: MealDetail, lang: Language) {
   return null;
 }
 
-function SubTooltip({ ingredient, translatedName, sub, lang }: {
-  ingredient: string;
+function IngredientSkeleton() {
+  return (
+    <View style={styles.ingredientRow}>
+      <View style={[styles.ingredientNum, { backgroundColor: "#2a2a2a" }]} />
+      <View style={skeletonStyles.name} />
+      <View style={skeletonStyles.measure} />
+    </View>
+  );
+}
+
+const skeletonStyles = StyleSheet.create({
+  name: { flex: 1, height: 14, borderRadius: 8, backgroundColor: "#2a2a2a" },
+  measure: { width: 48, height: 12, borderRadius: 6, backgroundColor: "#2a2a2a" },
+});
+
+// ── SubTooltip ────────────────────────────────────────────────────────────────
+function SubTooltip({ translatedName, sub, lang }: {
   translatedName: string;
   sub: string;
   lang: Language;
@@ -108,6 +123,7 @@ export function ApiRecipeDetail({ mealId, meal: preloaded, onClose, zeroWaste }:
 
   const ingredientNames = meal?.ingredients.map((i) => i.ingredient) ?? [];
   const translatedIngredients = useTranslatedIngredients(ingredientNames);
+  const translatingIngredients = useIngredientsLoading(ingredientNames);
 
   const zwDetail = meal ? getZeroWasteDetail(meal, language) : null;
   const translatedZwIngredient = useTranslatedIngredients(
@@ -126,7 +142,6 @@ export function ApiRecipeDetail({ mealId, meal: preloaded, onClose, zeroWaste }:
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
       <View style={[styles.container, { paddingTop: insets.top }]}>
-        {/* Header */}
         <View style={styles.header}>
           <Text style={styles.headerTitle} numberOfLines={1}>
             {loading ? t("detail.loading") : meal?.strMeal}
@@ -189,33 +204,30 @@ export function ApiRecipeDetail({ mealId, meal: preloaded, onClose, zeroWaste }:
                 </View>
               )}
 
-              {/* Ingredients */}
               <Text style={styles.sectionTitle}>
                 {t("detail.ingredients_title")} ({meal.ingredients.length})
               </Text>
-              {meal.ingredients.map((item, i) => {
-                const sub = getSubstitution(item.ingredient, language);
-                const translatedName = translatedIngredients[i] ?? item.ingredient;
-                return (
-                  <View key={i} style={styles.ingredientRow}>
-                    <View style={styles.ingredientNum}>
-                      <Text style={styles.ingredientNumText}>{i + 1}</Text>
-                    </View>
-                    <Text style={styles.ingredientName} numberOfLines={1}>
-                      {translatedName}
-                    </Text>
-                    <Text style={styles.ingredientMeasure}>{item.measure}</Text>
-                    {sub ? (
-                      <SubTooltip
-                        ingredient={item.ingredient}
-                        translatedName={translatedName}
-                        sub={sub}
-                        lang={language}
-                      />
-                    ) : null}
-                  </View>
-                );
-              })}
+
+              {translatingIngredients
+                ? meal.ingredients.map((_, i) => <IngredientSkeleton key={i} />)
+                : meal.ingredients.map((item, i) => {
+                    const sub = getSubstitution(item.ingredient, language);
+                    const translatedName = translatedIngredients[i] ?? item.ingredient;
+                    return (
+                      <View key={i} style={styles.ingredientRow}>
+                        <View style={styles.ingredientNum}>
+                          <Text style={styles.ingredientNumText}>{i + 1}</Text>
+                        </View>
+                        <Text style={styles.ingredientName} numberOfLines={1}>
+                          {translatedName}
+                        </Text>
+                        <Text style={styles.ingredientMeasure}>{item.measure}</Text>
+                        {sub ? (
+                          <SubTooltip translatedName={translatedName} sub={sub} lang={language} />
+                        ) : null}
+                      </View>
+                    );
+                  })}
 
               {/* Instructions */}
               <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
@@ -225,7 +237,6 @@ export function ApiRecipeDetail({ mealId, meal: preloaded, onClose, zeroWaste }:
                 <Text style={styles.instructions}>{meal.strInstructions}</Text>
               </View>
 
-              {/* YouTube */}
               {meal.strYoutube ? (
                 <Pressable onPress={() => Linking.openURL(meal.strYoutube)} style={styles.youtubeBtn}>
                   <Youtube size={18} color="hsl(25,90%,55%)" />
